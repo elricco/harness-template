@@ -1,0 +1,20 @@
+# Vorlage: in den Repo-Root kopieren.
+# Erzwingt: Domain haengt von nichts ab, Redaxo-Schicht darf Domain nutzen.
+deptrac:
+    paths:
+        - ./lib
+    layers:
+        - name: Domain
+          collectors:
+              - type: directory
+                value: lib/Domain/.*
+        - name: Redaxo
+          collectors:
+              - type: directory
+                value: lib/Redaxo/.*
+    ruleset:
+        # Redaxo-Schicht darf auf Domain zugreifen ...
+        Redaxo:
+            - Domain
+        # ... Domain auf nichts (reine, testbare Logik).
+        Domain: ~

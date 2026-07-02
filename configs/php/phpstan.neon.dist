@@ -1,0 +1,13 @@
+# Vorlage: in den Repo-Root kopieren. Level schrittweise anheben (Ziel: hoch).
+# ACHTUNG: Nur fuer Nicht-REDAXO-PHP! In REDAXO-Addons stattdessen rexstan
+# nutzen (php redaxo/bin/console rexstan:analyze) - bringt REDAXO-Stubs und
+# Baseline-Verwaltung mit. Siehe harness/verification-tools.md.
+parameters:
+    level: 6
+    paths:
+        - lib
+    tmpDir: var/phpstan
+    # Fuer REDAXO-Klassen ggf. Stubs/Baseline ergaenzen:
+    # bootstrapFiles:
+    #     - vendor/redaxo/... (falls vorhanden)
+    # baseline: phpstan-baseline.neon

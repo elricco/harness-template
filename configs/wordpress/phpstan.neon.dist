@@ -1,0 +1,10 @@
+# Vorlage: in den Repo-Root kopieren.
+# Benoetigt szepeviktor/phpstan-wordpress (bringt WP-Stubs mit).
+includes:
+    - vendor/szepeviktor/phpstan-wordpress/extension.neon
+
+parameters:
+    level: 6
+    paths:
+        - src
+    tmpDir: var/phpstan
