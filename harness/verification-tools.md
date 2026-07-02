@@ -14,6 +14,7 @@
 | Statik/Typen     | PHPStan (hohes Level)                | ESLint, `tsc --noEmit`       | PHPStan + WP-Stubs    |
 | Architektur      | Deptrac (Domain ⊥ rex_*)             | dependency-cruiser           | Deptrac               |
 | Security         | Psalm (taint), Composer audit        | `npm audit`, eslint-security | WPScan-Regeln         |
+| Secrets          | **gitleaks** (alle Stacks, Repo + Staging)                                                          |||
 | Barrierefreiheit | pa11y-ci / Lighthouse (gerenderte Seiten) | eslint-plugin-vuejs-accessibility, axe-core (vitest/Playwright), pa11y-ci | pa11y-ci / Lighthouse |
 | Datenschutz      | Externe-Hosts-Scan, PII-Log-Scan     | Externe-Hosts-Scan im Bundle | Externe-Hosts-Scan    |
 | Tests (TDD)      | PHPUnit                              | Vitest / Playwright          | PHPUnit + WP-Test-Lib |
@@ -88,6 +89,19 @@ grep -rniE 'fonts\.(googleapis|gstatic)|unpkg\.com|jsdelivr|cdnjs|youtube\.com/e
 # PII-Log-Scan: E-Mail-Adressen/IPs in Log-Aufrufen aufspüren.
 grep -rniE '(logger|rex_logger|error_log|console\.(log|error)).*(\$email|\$ip|e-?mail)' src/ lib/
 ```
+
+### Secrets (alle Stacks)
+```bash
+gitleaks git .                  # kompletter Repo-Scan inkl. Historie
+gitleaks protect --staged       # vor jedem Commit: nur gestagte Änderungen
+```
+
+- **Installation:** `brew install gitleaks` (macOS) bzw. GitHub Action
+  `gitleaks/gitleaks-action` in der CI.
+- Fund im Repo = Secret **rotieren**, nicht nur entfernen (Historie, siehe
+  [`security.md`](security.md)).
+- Zusätzlich im GitHub-Repo **Push Protection / Secret Scanning** aktivieren
+  (Settings → Code security).
 
 ## Regeln
 

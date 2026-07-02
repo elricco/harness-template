@@ -69,6 +69,7 @@ vendor/bin/php-cs-fixer fix --dry-run --diff       # Stil (@Symfony + @PSR12)
 php redaxo/bin/console rexstan:analyze             # PHPStan via rexstan (Ziel: max)
 vendor/bin/deptrac analyse                         # Domain ⊥ rex_*
 composer audit                                     # CVEs
+gitleaks protect --staged                          # keine Secrets im Commit
 ```
 
 Befunde beheben, bevor eine Aufgabe als erledigt gilt.

@@ -10,6 +10,42 @@
 - **Least Privilege:** Berechtigungen so eng wie möglich.
 - **Prepared Statements** für jeden DB-Zugriff mit Nutzereingaben.
 
+## Secrets & Repo-Hygiene
+
+- **Niemals Keys, Tokens oder Passwörter ins Repo** – auch nicht "kurz zum
+  Testen", auch nicht in Tests, Fixtures, Beispiel-Configs oder Kommentaren.
+- **`.env` wird nie committet.** `.env`, `.env.local`, `.env.*.local` gehören
+  in die `.gitignore`, **bevor** die erste `.env` entsteht. Committet wird nur
+  eine **`.env.example`** mit Platzhaltern (`DB_PASSWORD=changeme`) als Doku,
+  welche Variablen das Projekt braucht.
+- **Einmal gepusht = kompromittiert.** Ein Secret in der Git-Historie ist
+  verbrannt, auch wenn der Commit "gelöscht" wird: sofort **rotieren**, nicht
+  nur entfernen.
+- **Secrets nie in:** Logs, Fehlermeldungen, URLs/Query-Strings, Client-Bundles
+  (siehe `VITE_`-Regel unten), CI-Logs (maskierte GitHub-Secrets verwenden).
+- **Deterministische Prüfung:** **gitleaks** scannt Repo und Staging auf
+  Secret-Muster (siehe [`verification-tools.md`](verification-tools.md));
+  zusätzlich GitHub **Push Protection / Secret Scanning** im Remote aktivieren.
+
+## Angriffsklassen strukturell ausschließen (by design)
+
+Ziel ist nicht, Angriffe einzeln abzuwehren, sondern **die ganze Klasse
+unmöglich zu machen** – dann gibt es keinen Einzelfall, der vergessen werden
+kann:
+
+| Angriffsklasse       | Ausschluss-Regel                                                                 |
+| -------------------- | -------------------------------------------------------------------------------- |
+| SQL-Injection        | **Ausschließlich** Prepared Statements (`rex_sql`, `$wpdb->prepare`). String-Konkatenation in Queries ist verboten – nicht "vorsichtig benutzen", sondern gar nicht. |
+| XSS                  | Jede Ausgabe ist **escaped by default** (`rex_escape`, `esc_*`, Vue-Interpolation). Roh-HTML (`v-html`, `innerHTML`, `echo` ohne Escape) nur mit Sanitizer (DOMPurify/`wp_kses`) **und** Begründung im Code. |
+| Command Injection    | Keine Shell-Strings aus Variablen (`exec("cmd $var")` verboten). Prozesse über **Symfony Process mit Array-Argumenten** + Whitelist erlaubter Kommandos. |
+| Path Traversal       | Pfade nie aus Nutzereingaben zusammensetzen. Basis-Pfade über `rex_path`/Konstanten; vor Zugriff `realpath()`-Check gegen das erlaubte Basisverzeichnis. |
+| Unsichere Deserialisierung | Kein `unserialize()` auf Fremddaten – **JSON** (`json_decode`) verwenden. |
+| CSRF                 | Jede zustandsändernde Aktion braucht ein Token (`rex_csrf_token`, `wp_nonce`) **und** eine Berechtigungsprüfung – ohne Ausnahme. |
+| Schadhafte Uploads   | Whitelist erlaubter Typen/Endungen (nie Blacklist), Ablage außerhalb des Webroots oder ohne Ausführungsrechte, Dateinamen neu vergeben. |
+
+Was strukturell ausgeschlossen ist, wird per Statik erzwungen (PHPStan-Regeln,
+ESLint, Review) – nicht per Erinnerung.
+
 ## PHP / REDAXO
 
 - **SQL:** ausschließlich `rex_sql` mit gebundenen Parametern – **nie**

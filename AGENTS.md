@@ -6,7 +6,7 @@
 > nachgeladen.
 >
 > <!-- TEMPLATE: Kopiere diesen Ordner (AGENTS.md + harness/) in den Root deines Repos und passe die TODOs an. -->
-> <!-- Vorlagen-Version: 2.0.0 (2026-07-02) - https://github.com/elricco/harness-template -->
+> <!-- Vorlagen-Version: 2.1.0 (2026-07-02) - https://github.com/elricco/harness-template -->
 
 ## Mindset
 
@@ -32,6 +32,10 @@ Richtlinien, bevor du im jeweiligen Bereich arbeitest.
 7. **Datenschutz (DSGVO, Privacy by Design).** Datenminimierung, keine externen
    Requests/Tracker ohne Consent, PII löschbar halten. Details:
    [`harness/privacy.md`](harness/privacy.md).
+8. **Security by Design.** Keine Secrets im Repo (`.env` nie committen!),
+   Angriffsklassen strukturell ausschließen: nur Prepared Statements, Escaping
+   by default, keine Shell-Strings aus Variablen. Details:
+   [`harness/security.md`](harness/security.md).
 
 ## Projekt-Kontext
 
