@@ -38,6 +38,13 @@ Nicht-REDAXO-PHP gedacht (siehe
 ESLint/Prettier laufen i. d. R. über die Projekt-Presets (flat config); hier
 bewusst nicht dupliziert.
 
+**Vanilla Web (ohne Framework):** Beide Vorlagen sind auf Vue zugeschnitten –
+beim Kopieren anpassen (Hinweise stehen als `TEMPLATE:`-Kommentar in den
+Dateien): vue-Plugin raus, Vitest-Environment `node` + jsdom-Pragma je Datei,
+dependency-cruiser-Schichtnamen auf die eigene Struktur umschreiben.
+Praxisbeispiel: ein Vanilla-JS-Projekt
+(Schichtung `core ← render ← backgrounds`).
+
 ## WordPress (`wordpress/`)
 
 | Datei                 | Tool     | Zweck                              |

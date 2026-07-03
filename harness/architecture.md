@@ -113,6 +113,10 @@ src/
 - Durchgesetzt mit **dependency-cruiser** (siehe [`verification-tools.md`](verification-tools.md)).
 - **Publizierbarkeit** (Analogie zu Composer): saubere Exports/Barrels, damit ein
   Teil später als npm-Paket ausgekoppelt werden könnte.
+- **Ohne Framework gilt dasselbe Prinzip**, nur mit eigenen Schichtnamen –
+  z. B. `core/` (reine Logik) ← `render/` (Browser-API-Kapsel: DOM, Canvas,
+  Web Audio) ← `features/`. Entscheidend bleibt: reine Logik importiert keine
+  Browser-/UI-Schicht.
 
 ## WordPress – Schichtung
 

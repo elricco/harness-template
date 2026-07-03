@@ -1,4 +1,7 @@
 // Vorlage: in den Repo-Root kopieren.
+// TEMPLATE: Vue-Variante. Fuer Vanilla-Web-Projekte: vue-Plugin entfernen,
+// environment auf 'node' stellen (schneller) und DOM-Tests per Datei-Pragma
+// /* @vitest-environment jsdom */ markieren.
 import { defineConfig } from 'vitest/config'
 import vue from '@vitejs/plugin-vue'
 

@@ -1,5 +1,10 @@
 // Vorlage: in den Repo-Root kopieren.
 // Erzwingt die Schichtung aus harness/architecture.md.
+// TEMPLATE: Schichtnamen sind die Vue-Variante (domain/composables/components/
+// api/stores). Fuer andere Projekte die Pfade auf die eigene Schichtung
+// umschreiben - das Prinzip bleibt gleich: reine Logik importiert keine
+// Integrations-/UI-Schicht. Beispiel Vanilla Web:
+// core (rein) <- render (Browser-API-Kapsel) <- backgrounds/features.
 module.exports = {
   forbidden: [
     {

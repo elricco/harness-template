@@ -6,7 +6,7 @@
 > nachgeladen.
 >
 > <!-- TEMPLATE: Kopiere diesen Ordner (AGENTS.md + harness/) in den Root deines Repos und passe die TODOs an. -->
-> <!-- Vorlagen-Version: 2.1.0 (2026-07-02) - https://github.com/elricco/harness-template -->
+> <!-- Vorlagen-Version: 2.2.0 (2026-07-03) - https://github.com/elricco/harness-template -->
 
 ## Mindset
 
@@ -21,11 +21,22 @@ Richtlinien, bevor du im jeweiligen Bereich arbeitest.
 2. **KISS.** Einfacher, für Menschen lesbarer Code schlägt cleveren Code.
 3. **YAGNI.** Der beste Code ist der, der nicht geschrieben werden musste. Baue
    nur, was die aktuelle Spec verlangt – keine Vorratsabstraktionen.
-4. **Core-First (REDAXO).** Nutze immer erst die vom REDAXO-Core bereitgestellten
-   Funktionen und Klassen, bevor du im Addon eigene baust. Details:
-   [`harness/architecture.md`](harness/architecture.md).
-5. **Framework-Konventionen achten.** REDAXO- und Symfony-Konventionen folgen,
-   nicht dagegen arbeiten.
+4. **Core-First.** Nutze immer erst die Bausteine der Plattform, bevor Eigenes
+   entsteht. Details: [`harness/architecture.md`](harness/architecture.md).
+   <!-- TEMPLATE: stack-spezifisch - eine Variante waehlen, Rest loeschen: -->
+   - _REDAXO:_ Core-Funktionen/-Klassen (`rex_sql`, `rex_config`, …) vor
+     Addon-Eigenkreationen.
+   - _WordPress:_ WP-Core-APIs (`WP_Query`, Settings, Transients) vor
+     Plugin-Eigenbau.
+   - _Vue:_ bestehende Bausteine (shadcn-vue/Reka UI, VueUse) vor Eigenbau.
+   - _Vanilla Web:_ native Browser-APIs (Canvas, Web Audio, CSS `@property`)
+     vor Libraries.
+5. **Konventionen der Plattform achten.** Mit dem Stack arbeiten, nicht dagegen.
+   <!-- TEMPLATE: stack-spezifisch - eine Variante waehlen, Rest loeschen: -->
+   - _REDAXO:_ REDAXO- und Symfony-Konventionen.
+   - _WordPress:_ WordPress Coding Standards und Plugin-Konventionen.
+   - _Vue/Vanilla Web:_ offizieller Vue-Style-Guide bzw. Web-Standards und
+     progressive Enhancement.
 6. **Barrierefreiheit (WCAG 2.2 AA).** UI-Code ist erst fertig, wenn er
    zugänglich ist – semantisches HTML, Tastatur-Bedienbarkeit, Kontraste.
    Details: [`harness/accessibility.md`](harness/accessibility.md).
