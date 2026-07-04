@@ -6,6 +6,15 @@
 
 Specs liegen in `specs/` (Unterordner erlaubt). Eine Spec = eine Story.
 
+Bei größeren Vorhaben hat sich eine **zweistufige Hierarchie** bewährt
+(Vanilla-JS-Pilot): ein übergeordnetes **Gesamtdesign-Dokument**
+(Entscheidungen, Architektur, Arbeitspakete) + daraus abgeleitete
+**Story-Specs** pro Arbeitspaket. Beide nutzen dasselbe Frontmatter.
+
+**Visuelle Vorgaben** (Farben, Typo, Layout) gehören nicht in Story-Specs,
+sondern in die `DESIGN.md` im Repo-Root – auch Design ist eine Spec, mit
+eigenem Format und eigener Prüfung (siehe [`design.md`](design.md)).
+
 ## Spec-Format
 
 ```markdown

@@ -14,7 +14,7 @@ Richtlinien statt im Kopf des Teams.
    Session-Start lädt.
 2. **Lazy Loading:** Detailwissen liegt in `harness/` und wird nur bei Bedarf
    gelesen (Architektur, Coding-Style, Tests, Security, Barrierefreiheit,
-   Datenschutz, Specs).
+   Datenschutz, Design, Specs).
 3. **Deterministische Verifikation:** Statische Tools (PHPStan/rexstan,
    PHP-CS-Fixer, Deptrac, ESLint, dependency-cruiser, axe/pa11y …) prüfen nach
    jeder Änderung – kein zweiter, nicht-deterministischer Agent.

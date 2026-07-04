@@ -6,7 +6,7 @@
 > nachgeladen.
 >
 > <!-- TEMPLATE: Kopiere diesen Ordner (AGENTS.md + harness/) in den Root deines Repos und passe die TODOs an. -->
-> <!-- Vorlagen-Version: 2.2.0 (2026-07-03) - https://github.com/elricco/harness-template -->
+> <!-- Vorlagen-Version: 2.3.0 (2026-07-04) - https://github.com/elricco/harness-template -->
 
 ## Mindset
 
@@ -64,6 +64,7 @@ Spec → Test (Red) → Code (Green) → Refactor → Verifikation → Spec-Sync
 - **Bevor du Tests schreibst** → lies [`harness/testing.md`](harness/testing.md)
 - **Bei sicherheitsrelevanten Änderungen** → lies [`harness/security.md`](harness/security.md)
 - **Bei UI-/Template-/Frontend-Arbeit** → lies [`harness/accessibility.md`](harness/accessibility.md)
+- **Bei UI-Gestaltung (Farben, Typo, Layout, Look)** → lies `DESIGN.md` im Repo-Root + [`harness/design.md`](harness/design.md)
 - **Bei personenbezogenen Daten, Formularen, Tracking, externen Diensten** → lies [`harness/privacy.md`](harness/privacy.md)
 - **Beim Umgang mit Anforderungen/Specs** → lies [`harness/spec-driven.md`](harness/spec-driven.md)
 
@@ -72,6 +73,10 @@ Spec → Test (Red) → Code (Green) → Refactor → Verifikation → Spec-Sync
 Sobald du Quellcode geändert hast, führe die für den Stack passenden statischen
 Analysen aus und korrigiere Befunde, bevor du weitermachst. Konkrete Kommandos:
 [`harness/verification-tools.md`](harness/verification-tools.md).
+
+Die Aufrufe als **Package-Scripts** kapseln (`pnpm test` / `pnpm lint` /
+`composer test` …) – ein kanonischer Einstieg für Agent, CI und Mensch,
+statt dreimal gepflegter Kommandozeilen.
 
 <!-- TODO: Die für dieses Projekt gültigen Aufrufe hier explizit eintragen, z. B.:
 - `vendor/bin/phpstan analyse --memory-limit=512M`

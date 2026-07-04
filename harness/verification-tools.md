@@ -15,6 +15,7 @@
 | Architektur      | Deptrac (Domain ⊥ rex_*)             | dependency-cruiser           | Deptrac               |
 | Security         | Psalm (taint), Composer audit        | `npm audit`, eslint-security | WPScan-Regeln         |
 | Secrets          | **gitleaks** (alle Stacks, Repo + Staging)                                                          |||
+| Design           | **`@google/design.md lint`** (alle Stacks mit UI: Tokens, Referenzen, Kontrast)                     |||
 | Barrierefreiheit | pa11y-ci / Lighthouse (gerenderte Seiten) | eslint-plugin-vuejs-accessibility, axe-core (vitest/Playwright), pa11y-ci | pa11y-ci / Lighthouse |
 | Datenschutz      | Externe-Hosts-Scan, PII-Log-Scan     | Externe-Hosts-Scan im Bundle | Externe-Hosts-Scan    |
 | Tests (TDD)      | PHPUnit                              | Vitest / Playwright          | PHPUnit + WP-Test-Lib |
@@ -90,6 +91,15 @@ grep -rniE 'fonts\.(googleapis|gstatic)|unpkg\.com|jsdelivr|cdnjs|youtube\.com/e
 grep -rniE '(logger|rex_logger|error_log|console\.(log|error)).*(\$email|\$ip|e-?mail)' src/ lib/
 ```
 
+### Design (alle Stacks mit UI)
+```bash
+npx @google/design.md lint DESIGN.md    # nach jeder Aenderung an DESIGN.md
+```
+
+- Prüft Struktur, kaputte `{token}`-Referenzen, verwaiste Tokens und
+  Kontrast-Verhältnisse (siehe [`design.md`](design.md)). CLI-Version pinnen
+  (Spec ist alpha).
+
 ### Secrets (alle Stacks)
 ```bash
 gitleaks git .                  # kompletter Repo-Scan inkl. Historie
@@ -108,3 +118,9 @@ gitleaks protect --staged       # vor jedem Commit: nur gestagte Änderungen
 - **Tests laufen zuerst** (grün), dann Stil/Statik/Architektur.
 - Nur **geänderte** Dateien prüfen, wenn möglich (schneller).
 - Befunde beheben, bevor eine Aufgabe als erledigt gilt.
+- **Aufrufe als Package-Scripts kapseln** (`pnpm test`/`pnpm lint`/`pnpm a11y`
+  bzw. `composer test`): ein kanonischer Einstieg für Agent, CI und Mensch –
+  bewährt im Vanilla-JS-Pilot.
+- Config-Dateien dürfen statt im Repo-Root auch gesammelt in `configs/` liegen,
+  wenn die Scripts sie explizit referenzieren (`--config configs/…`) – hält
+  den Root schlank.
