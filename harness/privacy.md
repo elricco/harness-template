@@ -45,6 +45,20 @@
 - **Formulare:** nur die Felder, die der Zweck verlangt; so wenige Pflichtfelder
   wie möglich; Checkbox zur Datenschutzerklärung nicht vorangekreuzt;
   **Double-Opt-In** für Newsletter.
+- **Spam-Schutz ohne Drittanbieter (Default):** reCAPTCHA/Turnstile & Co. senden
+  bei *jedem* Seitenaufruf Daten an Dritte und sind damit einwilligungspflichtig.
+  Die datenschutzfreundliche Baseline kommt ohne aus: **Honeypot-Feld +
+  signiertes Zeit-Token + Rate-Limit** (siehe
+  [`security.md`](security.md#öffentliche-endpunkte--formulare-unauthentifiziert),
+  lauffähig in [`../examples/contact-form/`](../examples/contact-form/)).
+  Erst wenn das Spam-Aufkommen es erzwingt, ein **selbst gehostetes**
+  Proof-of-Work-Captcha (z. B. Altcha) nachrüsten – kein Drittanbieter-Transfer.
+- **IP nur flüchtig:** Für Rate-Limits die IP nur im Arbeitsspeicher bzw. als
+  gehashter Key mit kurzem TTL halten – nicht dauerhaft speichern, nicht loggen.
+- **Mailversand ist Auftragsverarbeitung.** Ein API-Mailer (Resend, Mailgun,
+  Postmark …) ist ein Drittdienst; bei US-Anbietern zusätzlich Drittlandtransfer.
+  Das SMTP-Postfach des eigenen (EU-)Hosters vermeidet beides und ist deshalb die
+  Default-Wahl für DSGVO-arme Projekte.
 - **Datenmodell löschbar & exportierbar designen** (Betroffenenrechte Art. 17/20):
   personenbezogene Daten so speichern, dass sie pro Person auffindbar, löschbar
   und exportierbar sind – keine PII in unstrukturierten Blobs verstreuen.

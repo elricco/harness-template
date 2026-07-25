@@ -13,6 +13,24 @@
   Vorratsabstraktionen, keine Schichten "für später".
 - **Testbarkeit vor Bequemlichkeit:** Geschäftslogik so schneiden, dass sie ohne
   laufendes REDAXO getestet werden kann (siehe Schichtung unten).
+- **Statisch by default, dynamisch nur wo nötig.** Was zur Build-Zeit entstehen
+  kann, entsteht zur Build-Zeit. Ausgeliefertes HTML/CSS/JS hat keine
+  Angriffsfläche, die ein Backend hätte – Angriffsfläche ist eine
+  Architektur-Entscheidung, keine Härtungs-Aufgabe hinterher.
+
+## Angriffsfläche als Architektur-Entscheidung
+
+Bei überwiegend statischen Websites (Astro, Eleventy, Hugo …):
+
+- Die **dynamischen Teile isolieren und zählbar halten** – typischerweise genau
+  einer (das Kontaktformular). Jeder weitere braucht eine Begründung in der Spec.
+- Der dynamische Teil ist **austauschbar hinter einer stabilen Schnittstelle**:
+  gleiches Frontend, gleiche Sicherheitsschichten, wechselbares Backend
+  (Serverless-Route vs. PHP-Endpunkt auf dem Hoster). Die Wahl fällt nach
+  Hosting und Datenschutz, nicht nach Technik-Vorliebe.
+- **Secrets liegen nie in der ausgelieferten Schicht.** Statisches Build =
+  öffentlich; Secrets nur in env bzw. in einer Config über dem Webroot.
+- Beispiel mit beiden Backends: [`../examples/contact-form/`](../examples/contact-form/).
 
 ## Schichtung (für TDD und Composer-Portabilität entscheidend)
 

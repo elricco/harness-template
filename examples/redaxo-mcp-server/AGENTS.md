@@ -59,6 +59,7 @@ Details: [`harness/workflow.md`](harness/workflow.md).
 - Code → [`harness/coding-style.md`](harness/coding-style.md)
 - Tests → [`harness/testing.md`](harness/testing.md)
 - Security → [`harness/security.md`](harness/security.md)
+- Tool-Parameter / Fremdtext → [`harness/untrusted-input.md`](harness/untrusted-input.md)
 - Specs → [`harness/spec-driven.md`](harness/spec-driven.md)
 
 ## Verifikation nach jeder Code-Änderung (verbindlich)
@@ -80,3 +81,6 @@ Befunde beheben, bevor eine Aufgabe als erledigt gilt.
 - `db.query` & Co. ausschließlich über `rex_sql` mit gebundenen Parametern.
 - `console.run` nur gegen die Command-Whitelist – kein beliebiges Exec.
 - Kein Tool ohne Audit-Log-Eintrag.
+- **Tool-Parameter kommen von einem LLM, das gekapert sein kann** – wie
+  Nutzereingaben behandeln (validieren, binden, escapen), nie als
+  vertrauenswürdig. Keine Secrets in Tool-Antworten oder Fehlermeldungen.

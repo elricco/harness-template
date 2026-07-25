@@ -1,0 +1,29 @@
+RewriteEngine On
+
+# --- Saubere Routen ohne .php-Endung ---
+
+# 1. Direkten Aufruf einer .php-Datei von außen als 404 tarnen.
+#    THE_REQUEST enthält IMMER die originale Browser-Anfrage, nie das
+#    interne Rewrite-Ziel -> die Regel unten (2) ist davon nicht betroffen.
+RewriteCond %{THE_REQUEST} \s/+[^?\s]*\.php[\s?] [NC]
+RewriteRule ^ - [R=404,L]
+
+# 2. /api/contact -> /api/contact.php (intern, ohne sichtbare Endung).
+#    Nur umschreiben, wenn die passende .php-Datei existiert.
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME}\.php -f
+RewriteRule ^(.+?)/?$ $1.php [L]
+
+# --- lib/ komplett vom Web abschneiden ---
+RedirectMatch 404 ^/api/lib/.*$
+
+# --- PHP-Fingerprint reduzieren + Security-Header ---
+<IfModule mod_headers.c>
+    # Entfernt "X-Powered-By: PHP/8.x" aus den Antworten.
+    Header always unset X-Powered-By
+    Header unset X-Powered-By
+
+    Header set X-Content-Type-Options "nosniff"
+    Header set Referrer-Policy "strict-origin-when-cross-origin"
+    Header set X-Frame-Options "DENY"
+</IfModule>

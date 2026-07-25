@@ -1,0 +1,89 @@
+---
+// Contact.astro — rein statische Komponente.
+// Enthält KEINEN Server-Code; das Markup wird zur Build-Zeit gerendert.
+// Die Logik läuft im <script> (Client) und in /api/* (Server).
+---
+<form id="contact-form" novalidate>
+  <label>
+    Name
+    <input name="name" type="text" required maxlength="100" autocomplete="name" />
+  </label>
+
+  <label>
+    E-Mail
+    <input name="email" type="email" required maxlength="200" autocomplete="email" />
+  </label>
+
+  <label>
+    Nachricht
+    <textarea name="message" required maxlength="5000" rows="6"></textarea>
+  </label>
+
+  <!-- Honeypot: absichtlich ohne "hidden", damit simple Bots es sehen und
+       ausfüllen. Für Menschen per CSS aus dem Sichtfeld geschoben. -->
+  <div class="hp" aria-hidden="true">
+    <label>
+      Firma (bitte leer lassen)
+      <input name="company" type="text" tabindex="-1" autocomplete="off" />
+    </label>
+  </div>
+
+  <button type="submit">Senden</button>
+  <p id="contact-status" role="status" aria-live="polite"></p>
+</form>
+
+<style>
+  /* Honeypot unsichtbar UND aus dem Tab-Fluss – ohne display:none,
+     das manche Bots erkennen und dann überspringen. */
+  .hp {
+    position: absolute;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+  }
+</style>
+
+<script>
+  const form = document.getElementById("contact-form") as HTMLFormElement;
+  const statusEl = document.getElementById("contact-status") as HTMLParagraphElement;
+  let formToken = "";
+
+  // Token beim Laden holen -> ab jetzt läuft die Mindestverweildauer.
+  fetch("/api/form-token")
+    .then((r) => r.json())
+    .then((d) => (formToken = d.token))
+    .catch(() => {});
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    statusEl.textContent = "Wird gesendet …";
+    const fd = new FormData(form);
+
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: fd.get("name"),
+          email: fd.get("email"),
+          message: fd.get("message"),
+          company: fd.get("company"), // Honeypot
+          formToken,
+        }),
+      });
+
+      if (res.ok) {
+        statusEl.textContent = "Danke! Deine Nachricht ist unterwegs.";
+        form.reset();
+      } else if (res.status === 429) {
+        statusEl.textContent = "Zu viele Versuche. Bitte kurz warten.";
+      } else {
+        const { error } = await res.json().catch(() => ({ error: "" }));
+        statusEl.textContent = error || "Da ging etwas schief. Bitte später erneut versuchen.";
+      }
+    } catch {
+      statusEl.textContent = "Netzwerkfehler. Bitte später erneut versuchen.";
+    }
+  });
+</script>

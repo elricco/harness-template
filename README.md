@@ -14,7 +14,7 @@ Richtlinien statt im Kopf des Teams.
    Session-Start lädt.
 2. **Lazy Loading:** Detailwissen liegt in `harness/` und wird nur bei Bedarf
    gelesen (Architektur, Coding-Style, Tests, Security, Barrierefreiheit,
-   Datenschutz, Design, Specs).
+   Datenschutz, Design, Specs, Umgang mit untrusted Input).
 3. **Deterministische Verifikation:** Statische Tools (PHPStan/rexstan,
    PHP-CS-Fixer, Deptrac, ESLint, dependency-cruiser, axe/pa11y …) prüfen nach
    jeder Änderung – kein zweiter, nicht-deterministischer Agent.
@@ -41,10 +41,14 @@ Ausgearbeitet für **PHP/REDAXO** (tief), **JS/TS/Vue** und **WordPress**
 (solide). Das Prinzip ist stack-neutral – weitere Stacks brauchen nur eigene
 Sektionen in den Richtlinien plus passende Analyse-Tools.
 
-## Beispiele
+## Beispiele & Bausteine
 
-[`examples/redaxo-mcp-server/`](examples/redaxo-mcp-server/) zeigt die Vorlage
-zugeschnitten auf ein echtes Projekt (REDAXO-Addon `mcp`).
+- [`examples/redaxo-mcp-server/`](examples/redaxo-mcp-server/) – die Vorlage
+  zugeschnitten auf ein echtes Projekt (REDAXO-Addon `mcp`).
+- [`examples/contact-form/`](examples/contact-form/) – lauffähiger Baustein:
+  Kontaktformular für statische Sites, ohne Captcha, mit zwei austauschbaren
+  Backends (Serverless / PHP-Shared-Hosting). Referenz zu den Schichten aus
+  `harness/security.md` und `harness/untrusted-input.md`.
 
 ## Rückfluss-Regel (gegen Template-Drift)
 

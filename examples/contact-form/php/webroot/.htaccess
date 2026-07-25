@@ -1,0 +1,57 @@
+# ============================================================
+#  Gehärtete Root-.htaccess (Webroot)
+#  Gehört in den Webroot, NEBEN das Astro-Build und den api/-Ordner.
+#  Die api/.htaccess (extensionless Routing) bleibt davon unberührt.
+# ============================================================
+
+# Directory-Listing aus – kein Verzeichnis verrät seinen Inhalt.
+Options -Indexes
+
+# Signatur aus Fehlerseiten entfernen.
+# Hinweis: "ServerTokens Prod" (kürzt den Server-Header auf "Apache" ohne
+# Version) ist NUR server-seitig setzbar, NICHT in .htaccess – dort würde es
+# einen 500er auslösen. Beim Hoster erfragen oder in der httpd.conf setzen.
+ServerSignature Off
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # 1. Nur benötigte Methoden zulassen; alles andere früh mit 405 abweisen,
+    #    bevor es überhaupt in PHP ankommt.
+    RewriteCond %{REQUEST_METHOD} !^(GET|HEAD|POST)$
+    RewriteRule ^ - [R=405,L]
+
+    # 2. Dotfiles/-ordner (.git, .env, .htpasswd …) als 404 tarnen –
+    #    Ausnahme: .well-known (ACME/Let's Encrypt, security.txt).
+    RewriteRule "(^|/)\.(?!well-known)" - [R=404,L]
+</IfModule>
+
+# 3. Sensible Datei-Endungen wegsperren (Backups, Dumps, Configs, Logs).
+<FilesMatch "\.(bak|old|orig|save|swp|sql|sqlite|log|ini|sh|dist|lock|yml|yaml)$">
+    Require all denied
+</FilesMatch>
+
+# 4. Neutrale Fehlerseiten (verstecken Apache/PHP-Default-Seiten).
+#    403 zeigt bewusst die 404-Seite -> Existenz wird nicht bestätigt.
+ErrorDocument 400 /error/400.html
+ErrorDocument 403 /error/404.html
+ErrorDocument 404 /error/404.html
+ErrorDocument 405 /error/405.html
+ErrorDocument 500 /error/500.html
+
+# 5. Security-Header.
+<IfModule mod_headers.c>
+    Header always unset X-Powered-By
+    Header set X-Content-Type-Options "nosniff"
+    Header set Referrer-Policy "strict-origin-when-cross-origin"
+    Header set X-Frame-Options "DENY"
+
+    # Nur aktivieren, wenn die Seite dauerhaft NUR über HTTPS läuft.
+    # Einmal mit preload gesetzt, ist es schwer rückgängig zu machen.
+    # Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+
+    # CSP ist stark, aber seitenspezifisch. Astro bündelt <script>-Blöcke in
+    # externe Dateien, daher ist eine strikte Policy meist möglich. Vor dem
+    # Aktivieren testen (Konsole auf Verstöße prüfen):
+    # Header set Content-Security-Policy "default-src 'self'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'"
+</IfModule>

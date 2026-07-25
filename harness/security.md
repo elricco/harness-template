@@ -42,9 +42,46 @@ kann:
 | Unsichere Deserialisierung | Kein `unserialize()` auf Fremddaten – **JSON** (`json_decode`) verwenden. |
 | CSRF                 | Jede zustandsändernde Aktion braucht ein Token (`rex_csrf_token`, `wp_nonce`) **und** eine Berechtigungsprüfung – ohne Ausnahme. |
 | Schadhafte Uploads   | Whitelist erlaubter Typen/Endungen (nie Blacklist), Ablage außerhalb des Webroots oder ohne Ausführungsrechte, Dateinamen neu vergeben. |
+| Mail-Header-Injection | `\r\n` aus **jedem** Wert strippen, der in einen Mail-Header wandert (`Reply-To`, `Subject`, `From`). Mails als reiner Text versenden, nicht als HTML. |
+| Offener Mail-Relay    | Absender-Adresse aus Nutzereingabe wird **nie** `From`, sondern nur `Reply-To`; `From` ist immer das eigene Postfach (SPF/DKIM). Endpunkt akzeptiert nur POSTs der eigenen Origin. |
+| Prompt Injection      | Fremdtext nie in den System-Prompt; verarbeitendes Modell ohne handelnde Tools. Details: [`untrusted-input.md`](untrusted-input.md). |
 
 Was strukturell ausgeschlossen ist, wird per Statik erzwungen (PHPStan-Regeln,
 ESLint, Review) – nicht per Erinnerung.
+
+## Öffentliche Endpunkte / Formulare (unauthentifiziert)
+
+Ein unauthentifizierter Endpunkt (Kontaktformular, Newsletter, Upload,
+Webhook) ist die am leichtesten erreichbare Angriffsfläche. Regeln:
+
+- **Schichten in dieser Reihenfolge**, damit teure Schritte (Mailversand,
+  DB-Schreiben, API-Calls) nur bei sauberen Requests laufen:
+  1. Methode + **Origin** prüfen (kein offener Relay; `Referer`-Fallback nur,
+     wenn der Client kein `fetch` ist)
+  2. **Rate-Limit** pro IP
+  3. **Honeypot** – ausgefüllt = Bot
+  4. **Signiertes Zeit-Token** (HMAC über Timestamp): prüft Echtheit *und* Alter
+  5. **Validierung + Längenlimits** auf jedem Feld
+  6. **Kontext-Escaping** vor dem Ziel (Mail-Header, SQL, HTML)
+  7. Aktion ausführen
+- **Bot-Abwehr gibt Fake-Erfolg zurück** (200), keinen Fehler – sonst lernt der
+  Bot, welche Schicht ihn erwischt hat.
+- **Geheimnis-Vergleiche in Konstantzeit** (`hash_equals`, `crypto.timingSafeEqual`
+  bzw. XOR-Schleife). Ein `===` auf HMACs ist über Antwortzeiten angreifbar.
+- **Fehlerdetails nur ins Log, nie an den Client.** Der Client bekommt eine
+  generische Meldung; Stacktraces/SMTP-Fehler bleiben serverseitig.
+- **Secrets nie im Frontend.** Alles, was der Browser sieht, ist öffentlich –
+  Keys/Passwörter nur in env bzw. in einer Config **über** dem Webroot.
+- **Fail-open vs. fail-closed bewusst entscheiden und im Code begründen.**
+  Beispiel: ein nicht schreibbarer Rate-Limit-Store darf durchlassen (andere
+  Schichten greifen weiter) – das ist eine Verfügbarkeits-Entscheidung, kein
+  Versehen, und gehört kommentiert.
+- **Obfuskation ist keine Sicherheitsgrenze.** Versteckte Endungen, unübliche
+  Pfade, entfernte `X-Powered-By`-Header reduzieren Fingerprint und Bot-Rauschen –
+  sie ersetzen keine Prüfung und werden nie als Schutz dargestellt.
+
+Lauffähige Referenz mit allen Schichten:
+[`../examples/contact-form/`](../examples/contact-form/).
 
 ## PHP / REDAXO
 
