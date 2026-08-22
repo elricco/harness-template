@@ -38,8 +38,9 @@ und Datenschutz (DSGVO, Privacy by Design).
 ## Stacks
 
 Ausgearbeitet für **PHP/REDAXO** (tief), **JS/TS/Vue** und **WordPress**
-(solide). Das Prinzip ist stack-neutral – weitere Stacks brauchen nur eigene
-Sektionen in den Richtlinien plus passende Analyse-Tools.
+(solide), plus **Astro** (aus dem Astro-Praxistest, 2026-08).
+Das Prinzip ist stack-neutral – weitere Stacks brauchen nur eigene Sektionen
+in den Richtlinien plus passende Analyse-Tools.
 
 ## Beispiele & Bausteine
 

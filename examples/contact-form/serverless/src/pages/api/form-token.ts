@@ -3,11 +3,12 @@
 // Laden des Formulars; damit startet die "Mindestverweildauer".
 import type { APIRoute } from "astro";
 import { issueToken } from "../../lib/formToken";
+import { requireEnv } from "../../lib/env";
 
 export const prerender = false;
 
 export const GET: APIRoute = async () => {
-  const token = await issueToken(import.meta.env.FORM_SECRET);
+  const token = await issueToken(requireEnv("FORM_SECRET", process.env.FORM_SECRET));
   return new Response(JSON.stringify({ token }), {
     status: 200,
     headers: {

@@ -45,6 +45,18 @@ dependency-cruiser-Schichtnamen auf die eigene Struktur umschreiben.
 Praxisbeispiel: ein Vanilla-JS-Projekt
 (Schichtung `core ← render ← backgrounds`).
 
+**Astro:** vue-Plugin raus (kein Vue), Vitest über `getViteConfig()` aus
+`astro/config` wrappen, wenn Tests `astro:content` o. ä. importieren (offizielles
+Astro+Vitest-Muster – Achtung: kann zu zwei koexistierenden vite-Major-Versionen
+im `node_modules`-Baum führen, wenn eine weitere Abhängigkeit `vite@8` als Peer
+zieht; im Zweifel mit `pnpm why vite` prüfen und den Typkonflikt gezielt mit
+`@ts-expect-error` an der betroffenen Stelle dokumentieren statt zu unterdrücken).
+dependency-cruiser-Schichtnamen auf `content ← layouts ← components/pages`
+umschreiben (siehe [`../harness/architecture.md`](../harness/architecture.md)),
+`.astro`-Dateien vom Cruise ausschließen (`exclude` in der Config – keine
+verlässliche Auflösung, Stand Astro 5). Praxisbeispiel: das Projekt
+einem Astro-Projekt.
+
 ## WordPress (`wordpress/`)
 
 | Datei                 | Tool     | Zweck                              |

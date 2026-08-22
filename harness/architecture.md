@@ -136,6 +136,45 @@ src/
   Web Audio) ← `features/`. Entscheidend bleibt: reine Logik importiert keine
   Browser-/UI-Schicht.
 
+## Astro – Schichtung
+
+Statisch by default, dynamischer Teil isoliert und zählbar (siehe
+„Angriffsfläche als Architektur-Entscheidung" oben):
+
+```
+src/
+├── content/        # Content Collections + Zod-Schemas, KEIN Import aus layouts/components/pages
+├── layouts/         # Seiten-Rahmen (BaseLayout etc.), nutzt components
+├── components/      # UI-Bausteine, bekommt Daten via Props
+├── lib/             # serverseitige Logik (Kontaktformular-Backend, env-Guards)
+├── pages/           # Routen, komponiert layouts + components, liest content
+└── pages/api/       # dynamischer Teil (z. B. Kontaktformular), `prerender = false`
+```
+
+- Abhängigkeitsrichtung: `content` importiert nichts aus `layouts`/`components`/`pages`.
+  `components` importiert nicht aus `lib` (Server-Code) — Komponenten sprechen `/api/*`
+  ausschließlich über `fetch()` zur Laufzeit an, nie über einen direkten Import.
+- Durchgesetzt mit dependency-cruiser für `.ts`-Dateien (siehe
+  [`verification-tools.md`](verification-tools.md)); `.astro`-Dateien sind davon
+  bewusst ausgenommen (dependency-cruiser hat keine verlässliche `.astro`-Auflösung,
+  Stand Astro 5) — dort gilt die Regel durch Code-Review, nicht durch ein
+  automatisiertes Gate.
+- **Content-Pflege per Git-CMS (Keystatic, Decap, …):** Das CMS-Schema
+  (z. B. `keystatic.config.ts`) bildet dieselben Content-Typen wie die
+  Content-Collection-Schemas ab, ist aber ein **separates, unabhängiges
+  Schema** – kein automatisches Zod-Mapping. Bei jeder Änderung an einem der
+  beiden Schemas **immer auch das andere prüfen und nachziehen**, sonst
+  laufen CMS-Formular und Content-Validierung auseinander.
+- **CMS-Admin-UI mit lokalem/keinem Auth-Modus (z. B. Keystatics `local`-Storage)
+  darf nie in einem Produktions-Build landen** – siehe
+  [`security.md`](security.md#öffentliche-endpunkte--formulare-unauthentifiziert)
+  für die Ausschluss-Regel. Praxismuster: Integration nur einbinden, wenn
+  `process.argv` `astro dev` erkennt, nicht `build`/`preview` (Details/Lektion
+  zur `defineConfig()`-Funktionsform-Falle: Astro-Projekt, 2026-08 –
+  bei aktueller Astro-Version gegenprüfen, ob `defineConfig` inzwischen eine
+  `({ command }) => …`-Funktionsform unterstützt, bevor `process.argv` als
+  Workaround übernommen wird).
+
 ## WordPress – Schichtung
 
 ```

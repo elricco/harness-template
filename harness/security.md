@@ -45,6 +45,7 @@ kann:
 | Mail-Header-Injection | `\r\n` aus **jedem** Wert strippen, der in einen Mail-Header wandert (`Reply-To`, `Subject`, `From`). Mails als reiner Text versenden, nicht als HTML. |
 | Offener Mail-Relay    | Absender-Adresse aus Nutzereingabe wird **nie** `From`, sondern nur `Reply-To`; `From` ist immer das eigene Postfach (SPF/DKIM). Endpunkt akzeptiert nur POSTs der eigenen Origin. |
 | Prompt Injection      | Fremdtext nie in den System-Prompt; verarbeitendes Modell ohne handelnde Tools. Details: [`untrusted-input.md`](untrusted-input.md). |
+| Ungeschützte Admin-/CMS-UI in Produktion | Git-basierte CMS mit lokalem/keinem eigenen Auth-Modus (z. B. Keystatic `local`-Storage, Decap ohne OAuth-Backend) dürfen nie in einen Produktions-Build gelangen – strukturell ausschließen (Integration nur im Dev-Build laden), nicht per Hosting-Firewall hoffen. |
 
 Was strukturell ausgeschlossen ist, wird per Statik erzwungen (PHPStan-Regeln,
 ESLint, Review) – nicht per Erinnerung.
@@ -131,6 +132,32 @@ Lauffähige Referenz mit allen Schichten:
 - **API-Aufrufe:** Antworten nicht blind vertrauen; Eingaben clientseitig
   validieren, aber Autorität liegt beim Server.
 - **CSP:** Content-Security-Policy setzen; keine Inline-Skripte.
+
+## Astro
+
+- **Server-seitige Secrets: `process.env`, nicht `import.meta.env`.** Vite
+  ersetzt `import.meta.env.*` nur **zur Build-Zeit**. Unter Adaptern, die
+  eine Route **zur Laufzeit** ausführen (`prerender = false`, z. B.
+  `@astrojs/node`), liefert `import.meta.env.FORM_SECRET` & Co. zur Laufzeit
+  `undefined` – der Endpunkt lehnt dann jede Anfrage stumm ab (oder, schlimmer,
+  ein Vergleich gegen `undefined` lässt eine Prüfung fälschlich bestehen).
+  `process.env` wird selbst nicht automatisch aus einer `.env` befüllt – dafür
+  `dotenv/config` als Seiteneffekt-Import laden. Lektion aus einem echten
+  Einsatz (Astro-Projekt, 2026-08): siehe
+  [`../examples/contact-form/serverless/README.md`](../examples/contact-form/serverless/README.md#umgebungsvariablen-processenv-nicht-importmetaenv).
+  **Cloudflare Workers hat kein `process.env`** – dort andere, adapterspezifische
+  Doku prüfen (`context.locals.runtime.env`), nicht blind übernehmen.
+- **CSP vs. Astros Standard-Inlining.** Astro schreibt kleine Stylesheets
+  (`<style>`) und hoisted `<script>`-Tags unter ~4 KB standardmäßig direkt
+  inline in die Seite – das bricht ein striktes `style-src`/`script-src 'self'`
+  ohne Hashes/Nonces. Gegenmittel: `build.inlineStylesheets: "never"` UND
+  `vite.build.assetsInlineLimit: 0` (Achtung: `assetsInlineLimit` ist KEINE
+  Astro-`build`-Option, sondern eine reine Vite-Option – unter Astros `build`-Key
+  gesetzt wird sie vom Config-Schema stillschweigend ignoriert). Bei
+  produktionsrelevanten CSP-Änderungen den tatsächlichen Build-Output
+  gegenprüfen (Hashes neu berechnen), nicht nur die Config lesen.
+- **Fremd-Requests im Client-Bundle** genauso behandeln wie bei jedem
+  JS/TS-Projekt (siehe oben, `VITE_`-Regel).
 
 ## Prüfung
 

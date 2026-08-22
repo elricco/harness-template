@@ -6,7 +6,7 @@
 > nachgeladen.
 >
 > <!-- TEMPLATE: Kopiere diesen Ordner (AGENTS.md + harness/) in den Root deines Repos und passe die TODOs an. -->
-> <!-- Vorlagen-Version: 2.4.0 (2026-07-25) - https://github.com/elricco/harness-template -->
+> <!-- Vorlagen-Version: 2.5.0 (2026-08-23) - https://github.com/elricco/harness-template -->
 
 ## Mindset
 
@@ -31,12 +31,16 @@ Richtlinien, bevor du im jeweiligen Bereich arbeitest.
    - _Vue:_ bestehende Bausteine (shadcn-vue/Reka UI, VueUse) vor Eigenbau.
    - _Vanilla Web:_ native Browser-APIs (Canvas, Web Audio, CSS `@property`)
      vor Libraries.
+   - _Astro:_ Content Collections, `<Image>`/`<Picture>`, View Transitions
+     und eingebaute Integrationen (`@astrojs/sitemap` etc.) vor Eigenbau.
 5. **Konventionen der Plattform achten.** Mit dem Stack arbeiten, nicht dagegen.
    <!-- TEMPLATE: stack-spezifisch - eine Variante waehlen, Rest loeschen: -->
    - _REDAXO:_ REDAXO- und Symfony-Konventionen.
    - _WordPress:_ WordPress Coding Standards und Plugin-Konventionen.
    - _Vue/Vanilla Web:_ offizieller Vue-Style-Guide bzw. Web-Standards und
      progressive Enhancement.
+   - _Astro:_ Islands-Architektur (Client-JS nur wo nötig, `client:*`-
+     Direktiven bewusst wählen), statisch by default, Astro-Style-Guide.
 6. **Barrierefreiheit (WCAG 2.2 AA).** UI-Code ist erst fertig, wenn er
    zugänglich ist – semantisches HTML, Tastatur-Bedienbarkeit, Kontraste.
    Details: [`harness/accessibility.md`](harness/accessibility.md).

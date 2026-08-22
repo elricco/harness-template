@@ -7,6 +7,7 @@ import type { APIRoute } from "astro";
 import { verifyToken } from "../../lib/formToken";
 import { rateLimit } from "../../lib/rateLimit";
 import { analyzeUntrusted } from "../../lib/untrusted";
+import { requireEnv } from "../../lib/env";
 
 export const prerender = false; // nur diese Route läuft serverseitig
 
@@ -28,8 +29,17 @@ function validate(name: string, email: string, message: string): string | null {
 
 export const POST: APIRoute = async ({ request, clientAddress }) => {
   // 1. Origin-Check: nur POSTs von der eigenen Domain, kein offener Relay.
-  if (request.headers.get("origin") !== import.meta.env.SITE_ORIGIN)
-    return json({ error: "Forbidden" }, 403);
+  //    SITE_ORIGIN fehlt = Konfigurationsfehler, kein legitimes "Forbidden" –
+  //    sonst würde ein fehlender Wert einen Origin-Check versehentlich
+  //    bestehen lassen (siehe env.ts).
+  let siteOrigin: string;
+  try {
+    siteOrigin = requireEnv("SITE_ORIGIN", process.env.SITE_ORIGIN);
+  } catch (err) {
+    console.error(err);
+    return json({ error: "Serverfehler. Bitte später erneut versuchen." }, 500);
+  }
+  if (request.headers.get("origin") !== siteOrigin) return json({ error: "Forbidden" }, 403);
 
   // 2. Rate-Limit pro IP (grobe erste Barriere, siehe rateLimit.ts).
   if (!rateLimit(`contact:${clientAddress}`, 5, 60_000))
@@ -49,7 +59,7 @@ export const POST: APIRoute = async ({ request, clientAddress }) => {
   if (company.trim() !== "") return json({ ok: true }, 200);
 
   // 5. Signiertes Zeit-Token: echt (HMAC) UND mind. 3 s alt.
-  if (!(await verifyToken(formToken, import.meta.env.FORM_SECRET)))
+  if (!(await verifyToken(formToken, requireEnv("FORM_SECRET", process.env.FORM_SECRET))))
     return json({ error: "Formular abgelaufen. Bitte Seite neu laden." }, 403);
 
   // 6. Inhaltliche Validierung + Längenlimits.
@@ -79,12 +89,12 @@ export const POST: APIRoute = async ({ request, clientAddress }) => {
   const res = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${import.meta.env.RESEND_API_KEY}`,
+      Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      from: import.meta.env.CONTACT_FROM,
-      to: [import.meta.env.CONTACT_TO],
+      from: process.env.CONTACT_FROM,
+      to: [process.env.CONTACT_TO],
       reply_to: safeEmail,
       subject: `Neue Nachricht von ${safeName}`,
       text: body, // als text, nicht html -> kein aktiver Code im Postfach
