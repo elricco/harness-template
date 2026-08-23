@@ -69,12 +69,20 @@ vendor/bin/phpstan analyse   # mit szepeviktor/phpstan-wordpress
 ### Barrierefreiheit (alle Stacks mit UI)
 ```bash
 # TODO: URLs/Setup an Projekt anpassen (lokale Instanz muss laufen)
+pnpm exec puppeteer browsers install chrome   # siehe Chrome-in-CI-Hinweis unten
 pnpm pa11y-ci                # gegen gerenderte Seiten, WCAG 2.2 AA (.pa11yci)
-pnpm lighthouse <url> --only-categories=accessibility --quiet   # Smoke-Check
+npx @lhci/cli autorun        # Accessibility-/SEO-Score als Gate (lighthouserc.json)
 ```
 
 - **pa11y-ci** prüft gerenderte Seiten – funktioniert für REDAXO, WordPress und
   SPAs gleich. Config-Vorlage: [`../configs/a11y/.pa11yci`](../configs/a11y/.pa11yci).
+- **Lighthouse CI**: Config-Vorlage
+  [`../configs/a11y/lighthouserc.json`](../configs/a11y/lighthouserc.json).
+- **Chrome in CI:** beide Tools brauchen ein echtes Chrome – "Could not find
+  Chrome" (Puppeteer-Download übersprungen) und "No usable sandbox!" (GitHub-
+  Actions-Runner ohne unprivilegierte User-Namespaces) sind reale, in einer
+  echten CI aufgetretene Fallstricke, keine Theorie. Details und Fix in
+  [`../configs/README.md`](../configs/README.md#barrierefreiheit-a11y--stack-übergreifend).
 - **axe-core** läuft zusätzlich in Komponenten-/E2E-Tests (`vitest-axe`,
   `@axe-core/playwright`) – damit ist A11y Teil des normalen TDD-Laufs.
 - Automatisierte Checks finden nur ~30–50 % der Verstöße → manuelle Kurzprüfung

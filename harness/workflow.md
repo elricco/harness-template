@@ -32,3 +32,18 @@
 - Kein Push, bevor Tests grün sind und die statische Analyse sauber ist.
 
 <!-- TODO: Projektspezifische Branch-/PR-Konventionen ergänzen. -->
+
+## CI/CD-Actions & Node-Version aktuell halten
+
+Gepinnte GitHub-Action-Versionen und Node-LTS-Stände sind Momentaufnahmen –
+sie veralten, ohne dass der Code sich ändert, und GitHub deprecatet
+Runner-Node-Versionen mit Vorlauf, aber verbindlich (Beispiel:
+[Node 20 Deprecation-Ankündigung](https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/)).
+Vor dem ersten produktiven CI-Setup (und danach in größeren Abständen) gegen
+die tatsächlichen Marketplace-/Release-Seiten prüfen, nicht aus dem
+Gedächtnis oder von einem älteren Projekt kopieren – Stand beim Schreiben
+dieser Zeile (2026-08, siehe Astro-Praxistest):
+`actions/checkout@v7`, `actions/setup-node@v7`, `actions/upload-artifact@v7`,
+`pnpm/action-setup@v6` (eigene, niedrigere Versionszählung, anderer
+Maintainer), Node **24** als aktuelle Active-LTS (22 nur noch Maintenance).
+Diese Zahlen selbst werden veralten – die Prüfpflicht bleibt.

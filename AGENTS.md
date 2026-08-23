@@ -6,7 +6,7 @@
 > nachgeladen.
 >
 > <!-- TEMPLATE: Kopiere diesen Ordner (AGENTS.md + harness/) in den Root deines Repos und passe die TODOs an. -->
-> <!-- Vorlagen-Version: 2.5.0 (2026-08-23) - https://github.com/elricco/harness-template -->
+> <!-- Vorlagen-Version: 2.6.0 (2026-08-23) - https://github.com/elricco/harness-template -->
 
 ## Mindset
 

@@ -66,15 +66,55 @@ einem Astro-Projekt.
 
 ## Barrierefreiheit (`a11y/`) – stack-übergreifend
 
-| Datei       | Tool     | Zweck                                        |
-| ----------- | -------- | -------------------------------------------- |
-| `.pa11yci`  | pa11y-ci | WCAG 2.2 AA gegen gerenderte Seiten (URLs anpassen!) |
+| Datei               | Tool          | Zweck                                                |
+| ------------------- | ------------- | ----------------------------------------------------- |
+| `.pa11yci`          | pa11y-ci      | WCAG 2.2 AA gegen gerenderte Seiten (URLs anpassen!)  |
+| `lighthouserc.json` | Lighthouse CI | Accessibility-/SEO-Score als Build-Gate (URLs anpassen!) |
 
 Installation:
 ```bash
-pnpm add -D pa11y-ci
+pnpm add -D pa11y-ci puppeteer
 ```
 
 axe-core in Tests (`vitest-axe`, `@axe-core/playwright`) und
 `eslint-plugin-vuejs-accessibility` laufen über die normalen Test-/Lint-Setups
 (siehe [`../harness/accessibility.md`](../harness/accessibility.md)).
+
+**Chrome in CI (Lektion aus Astro-Projekt, 2026-08):** pa11y-ci und
+Lighthouse CI brauchen beide ein echtes Chrome. Zwei Fallstricke, die genau
+dann auftreten, wenn es lokal funktioniert und in der CI nicht (oder erst
+nach Tagen unbemerkt bleiben):
+
+- **Chrome fehlt ganz** ("Could not find Chrome"): `pnpm` blockt seit v10
+  standardmäßig Install-Skripte von Abhängigkeiten – auch das von
+  `puppeteer`, das den Chrome-Download macht. Verlässlicher als
+  `pnpm.onlyBuiltDependencies` in package.json (pnpm-Versions- und
+  Cache-abhängig, hat in einer echten CI trotz korrekter Config nicht
+  gegriffen) ist ein **expliziter Install-Schritt**, der unabhängig von
+  pnpm-Version/Store-Cache immer läuft:
+  ```bash
+  pnpm exec puppeteer browsers install chrome
+  ```
+  Dafür muss `puppeteer` eine **direkte** devDependency sein (nicht nur
+  transitiv über `pa11y-ci`), sonst findet `pnpm exec` das Binary nicht.
+  Diesen Schritt vor `pnpm build`/dem eigentlichen Testlauf einfügen (bei
+  pa11y-ci z. B. direkt im `a11y`-Package-Script).
+- **Chrome startet nicht** ("FATAL: No usable sandbox!"): GitHub-Actions-
+  Runner (Ubuntu 24.04+) haben unprivilegierte User-Namespaces per AppArmor
+  deaktiviert – Chromes eigener Sandbox-Mechanismus kann sich dort nicht
+  initialisieren. Fix: `--no-sandbox` (+ optional
+  `--disable-setuid-sandbox`) als Chrome-Launch-Flag, siehe `.pa11yci` in
+  diesem Ordner. Vertretbar, weil beide Tools nur die eigene, gerade
+  gebaute Seite besuchen – keine fremden/untrusted URLs, für die der
+  Sandbox-Schutz eigentlich gedacht ist.
+
+**Lighthouse-Preset auf schlanken Seiten (dieselbe Lektion):**
+`lighthouse:recommended` asserted `minScore` gegen **jeden** Einzelaudit.
+Auf einer Seite ohne Bilder/Animationen liefern manche Audits
+(`lcp-lazy-loaded`, `non-composited-animations`, `prioritize-lcp-image`)
+grundsätzlich keinen Score (`null`/`NaN`, "nicht anwendbar") – das zählt bei
+einer `minScore`-Assertion fälschlich als Fail, nicht als Bestanden. In
+`lighthouserc.json` hier bereits auf `"off"` gesetzt; bei eigenen Anpassungen
+gezielt nur die wirklich nicht anwendbaren Audits abschalten, nicht das
+ganze Preset verwerfen – `errors-in-console` und `link-text` etc. sind
+echte, sinnvolle Checks.
