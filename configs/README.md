@@ -64,6 +64,15 @@ einem Astro-Projekt.
 | `phpcs.xml.dist`      | PHPCS    | WordPress Coding Standards (WPCS)  |
 | `phpstan.neon.dist`   | PHPStan  | Statik mit WP-Stubs                |
 
+## Docker-Entwicklungsumgebung (`docker/`) – stack-übergreifend
+
+| Datei                       | Zweck                                                       |
+| ---------------------------- | ------------------------------------------------------------ |
+| `Dockerfile.php.dist`        | Gepinntes Sprachversions-Image (PHP-Beispiel)                |
+| `docker-compose.yml.dist`    | `app`-Service + `mailer`-Service (Mailpit, Mailversand lokal sichtbar) |
+
+Details, Rationale und Nutzung: [`docker/README.md`](docker/README.md).
+
 ## Barrierefreiheit (`a11y/`) – stack-übergreifend
 
 | Datei               | Tool          | Zweck                                                |
@@ -118,3 +127,29 @@ einer `minScore`-Assertion fälschlich als Fail, nicht als Bestanden. In
 gezielt nur die wirklich nicht anwendbaren Audits abschalten, nicht das
 ganze Preset verwerfen – `errors-in-console` und `link-text` etc. sind
 echte, sinnvolle Checks.
+
+**`staticDistDir` vs. Live-Server (Lektion aus einem Symfony-Rebuild-Projekt,
+2026-09):** `lighthouserc.json` hier ist per `staticDistDir: "./dist"` auf
+statische Build-Ausgaben zugeschnitten (Astro, Eleventy, Hugo …). Bei jedem
+Stack mit einem echten Live-Server (Symfony, WordPress, jedes klassische
+Backend-Framework) **ignoriert Lighthouse CI den laufenden Server komplett**,
+sobald `staticDistDir` gesetzt ist – der CI-Job "besteht" grün, ohne jemals
+eine Seite gemessen zu haben, weil nichts einen Fehler wirft. Das ist ein
+stiller Fail-Open, keine Fehlermeldung. Für live-server-basierte Stacks
+stattdessen:
+
+```json
+{
+  "ci": {
+    "collect": {
+      "url": ["http://localhost:8000/", "http://localhost:8000/kontakt"],
+      "startServerCommand": "php -S 0.0.0.0:8000 -t public",
+      "startServerReadyPattern": "Development Server \\(http"
+    }
+  }
+}
+```
+
+`staticDistDir` und `collect.url`/`startServerCommand` schließen sich
+gegenseitig aus – beim Kopieren dieser Vorlage in ein Live-Server-Projekt
+`staticDistDir` **entfernen**, nicht nur die URL-Liste anpassen.

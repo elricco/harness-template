@@ -1,0 +1,51 @@
+# Vorlage: in den Repo-Root kopieren (als "docker-compose.yml"), Startbefehl
+# des "app"-Service an das eigene Projekt anpassen (siehe Kommentar unten).
+#
+# Zwei Services:
+#   app    - die Anwendung selbst, mit dem exakt richtigen Sprachversions-
+#            Image aus Dockerfile (siehe Dockerfile.php.dist daneben).
+#   mailer - Mailpit: faengt jede ausgehende Mail lokal ab, statt sie an
+#            einen echten SMTP-Server zu schicken. Web-UI unter
+#            http://localhost:8025 zeigt jede "gesendete" Mail sofort an.
+#
+# Lektion (Symfony-Rebuild-Projekt, 2026-09): ein Kontaktformular-Feature war
+# vollstaendig durch Tests abgedeckt (Unit- und Funktionstests, alle gruen),
+# aber JEDER dieser Tests mockte den Mailversand - kein einziger Testlauf hat
+# je den echten Mailer-Code-Pfad ausgefuehrt. Ein Bug in der Mailer-
+# Transport-Konfiguration (Versand ueber eine Nachrichten-Warteschlange ohne
+# laufenden Consumer) blieb dadurch bis zu einer finalen End-to-End-Pruefung
+# unentdeckt und haette in Produktion jede Formular-Einreichung mit einem
+# Serverfehler beantwortet. Ein lokaler Mailcatcher macht "wurde die Mail
+# wirklich verschickt" waehrend der Entwicklung triv-ial pruefbar, statt sich
+# auf gemockte Tests zu verlassen - ersetzt aber NICHT den in
+# harness/testing.md geforderten Test, der den echten Mailer-Service aus dem
+# Container aufloest.
+
+services:
+  app:
+    build: .
+    volumes:
+      - .:/app
+    ports:
+      - '8000:8000'
+    working_dir: /app
+    depends_on:
+      - mailer
+    environment:
+      # Ueberschreibt die Produktions-DSN aus .env fuer lokale Entwicklung -
+      # Mail landet in Mailpit statt beim echten SMTP-Anbieter. Kein
+      # .env.local-Handling noetig, greift automatisch unter Docker.
+      MAILER_DSN: 'smtp://mailer:1025'
+    # TEMPLATE: Startbefehl ans Projekt anpassen. Beispiel Symfony/PHP mit
+    # eingebautem Dev-Server (Router-Skript siehe harness/testing.md, Notiz
+    # zu extensionless Routes unter "php -S" ohne Apache/.htaccess):
+    command: php -S 0.0.0.0:8000 -t public
+
+  mailer:
+    image: axllent/mailpit
+    ports:
+      - '8025:8025' # Web-UI
+      - '1025:1025' # SMTP
+    environment:
+      MP_SMTP_AUTH_ACCEPT_ANY: 1
+      MP_SMTP_AUTH_ALLOW_INSECURE: 1

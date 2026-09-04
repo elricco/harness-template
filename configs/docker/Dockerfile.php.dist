@@ -1,0 +1,30 @@
+# Vorlage: in den Repo-Root kopieren (als "Dockerfile"), Basis-Image-Tag auf
+# die im Projekt tatsaechlich geforderte Version pinnen.
+#
+# Lektion (Symfony-Rebuild-Projekt, 2026-09): der Entwickler-Rechner hatte
+# standardmaessig eine aeltere PHP-Version auf dem PATH (aus einer lokalen
+# Alt-Installation) als das Projekt brauchte. Jeder Agent-Dispatch musste
+# deshalb einen manuellen Pfad-Workaround durchreichen ("benutze
+# $(brew --prefix php@8.3)/bin/php"), und ein Review-Durchlauf ist einmal
+# genau daran gescheitert, weil der Hinweis im Dispatch fehlte. Ein
+# projekteigenes Docker-Setup mit der exakt richtigen Version macht diesen
+# Workaround fuer jeden zukuenftigen Task-Dispatch ueberfluessig - Agent und
+# Mensch nutzen dieselbe, garantiert richtige Umgebung.
+#
+# Gilt sinngemaess fuer jeden Stack, nicht nur PHP: Basis-Image und Version
+# tauschen (node:20-slim, python:3.12-slim, ...), der Rest des Musters
+# (docker-compose.yml mit einem "app"-Service + Bind-Mount) bleibt gleich.
+
+FROM php:8.3-cli
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    git \
+    unzip \
+    libicu-dev \
+    libzip-dev \
+    && docker-php-ext-install intl zip \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+
+WORKDIR /app

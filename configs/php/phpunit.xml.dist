@@ -1,5 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Vorlage: in den Repo-Root kopieren. -->
+<!--
+     Symfony-Projekte (KernelTestCase/WebTestCase): bootstrap="vendor/autoload.php"
+     genuegt NICHT. Symfony braucht tests/bootstrap.php (Dotenv laedt .env/.env.test,
+     setzt KERNEL_CLASS) PLUS einen <php>-Block mit APP_ENV=test - sonst wirft
+     self::bootKernel() "LogicException: You must set the KERNEL_CLASS environment
+     variable". Lektion (Symfony-Rebuild-Projekt, 2026-09): diese Datei 1:1 kopiert
+     brach beim ersten echten Kernel-Test, weil das Skeleton-generierte
+     phpunit.dist.xml (bootstrap="tests/bootstrap.php" + APP_ENV-Server-Var) durch
+     diese Vorlage ueberschrieben wurde. Fuer Symfony stattdessen:
+       bootstrap="tests/bootstrap.php"
+       <php><server name="APP_ENV" value="test" force="true" /></php>
+     (tests/bootstrap.php kommt vom symfony/skeleton, nicht selbst schreiben.)
+-->
 <phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
          bootstrap="vendor/autoload.php"

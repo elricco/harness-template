@@ -20,6 +20,31 @@ Regeln:
   nicht Implementierungsdetails.
 - Ein Test = eine Aussage. Klarer Name (`brutto_rundet_kaufmaennisch`).
 
+## Grenzen von In-Process-Tests
+
+Zwei Lektionen aus einem abgeschlossenen Symfony-Rebuild-Projekt (2026-09):
+eine vollständig grüne Testsuite (79 Tests) verdeckte zwei
+produktionsblockierende Bugs, die erst eine abschließende Whole-Branch-Review
+mit echten HTTP-Requests gegen eine laufende Instanz aufdeckte.
+
+- **Jede nach außen wirkende Fähigkeit (Mailversand, externe API,
+  Zahlungsanbieter) braucht mindestens einen Test, der den echten Service
+  aus dem DI-Container/Service-Locator auflöst** – gegen einen Null-/Test-
+  Transport, nicht gemockt. Grund: wenn *jeder* Test das Interface mockt
+  (z. B. `MailerInterface`), validiert keiner die tatsächliche
+  Service-Verdrahtung. Im konkreten Fall lief der Mailversand durch eine
+  falsch konfigurierte Transport-Kette (Nachrichten-Warteschlange ohne
+  laufenden Consumer) – jeder gemockte Test blieb grün, jede echte
+  Formular-Einreichung hätte einen Serverfehler zurückgegeben.
+- **Definition-of-Done für jede neue Route/jeden neuen Endpunkt: ein echter
+  HTTP-Smoke-Test gegen eine laufende Instanz** (z. B. `curl`), zusätzlich
+  zum In-Process-Test-Client des Frameworks (`WebTestCase`-artige Clients
+  umgehen den echten Webserver und können daher Routing-/Rewrite-
+  Konfigurationsfehler – fehlende `.htaccess`, falscher Docroot – nicht
+  erkennen). Ein lokales Docker-Setup (siehe
+  [`../configs/docker/`](../configs/docker/)) macht diesen Smoke-Test
+  günstig genug, um ihn regelmäßig zu wiederholen, nicht nur einmal am Ende.
+
 ## Testbarkeit durch Schnitt
 
 Damit TDD in REDAXO überhaupt schnell geht: Geschäftslogik gehört in die

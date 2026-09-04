@@ -1,5 +1,18 @@
 # Vorlage: in den Repo-Root kopieren.
 # Erzwingt: Domain haengt von nichts ab, Redaxo-Schicht darf Domain nutzen.
+#
+# Lektion (Symfony-Rebuild-Projekt, 2026-09): eine Layer-Definition ohne
+# Vendor-Layer prueft NUR die eigenen src-/lib-Schichten gegeneinander.
+# Importe aus Fremdcode (Symfony, Doctrine, ...) landen dann automatisch im
+# Deptrac-Bucket "Uncovered" und werden NIE geprueft - "Domain: ~" (haengt
+# von nichts ab) ist mit einer nackten Zwei-Schichten-Config faktisch
+# unenforced. In besagtem Projekt hatte ein Domain-Service unbemerkt
+# `Symfony\Component\Yaml\Yaml` importiert, `composer deptrac` blieb trotzdem
+# gruen. Die Vendor-Layer unten schliesst genau diese Luecke: sobald sie
+# existiert, faengt "Domain: ~" auch Framework-Importe ab. Namespace-Liste an
+# das eigene Projekt anpassen (bei reinem REDAXO-Code ggf. leer lassen /
+# entfernen, REDAXO selbst ist ueberwiegend prozedural mit globalen rex_*-
+# Funktionen, kein rein klassenbasierter Import).
 deptrac:
     paths:
         - ./lib
@@ -12,9 +25,15 @@ deptrac:
           collectors:
               - type: directory
                 value: lib/Redaxo/.*
+        - name: Vendor
+          collectors:
+              - type: className
+                value: ^(Symfony|Doctrine|Psr)\\
     ruleset:
-        # Redaxo-Schicht darf auf Domain zugreifen ...
+        # Redaxo-Schicht darf auf Domain und auf Vendor-Code zugreifen ...
         Redaxo:
             - Domain
-        # ... Domain auf nichts (reine, testbare Logik).
+            - Vendor
+        # ... Domain auf nichts (reine, testbare Logik) - das schliesst
+        # jetzt auch Vendor/Framework-Importe mit ein.
         Domain: ~

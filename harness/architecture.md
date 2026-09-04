@@ -17,6 +17,20 @@
   kann, entsteht zur Build-Zeit. Ausgeliefertes HTML/CSS/JS hat keine
   Angriffsfläche, die ein Backend hätte – Angriffsfläche ist eine
   Architektur-Entscheidung, keine Härtungs-Aufgabe hinterher.
+- **Skeleton-Ballast früh gegen die Nicht-Ziele der Spec prüfen.**
+  Framework-Skeletons/Meta-Pakete (z. B. `symfony/webapp-pack`) installieren
+  oft mehr Subsysteme, als das Projekt tatsächlich braucht – Datenbank-ORM,
+  Message-Queue, Notifier. Bleibt das unbemerkt liegen, wird es zur
+  unbeauftragten Komplexität: ungeprüft, ungetestet, aber im Ausführungspfad.
+  Lektion (Symfony-Rebuild-Projekt, 2026-09): die Spec nannte "keine
+  Datenbank" explizit als Nicht-Ziel, trotzdem blieb der komplette
+  Doctrine/ORM/Migrations/Messenger-Stack aus dem initialen Skeleton bis zur
+  finalen Review unentdeckt liegen – und war die Ursache eines
+  produktionsblockierenden Bugs (Mailversand lief unbemerkt durch eine
+  Message-Queue ohne laufenden Consumer). Direkt nach dem Scaffolding früh
+  gegen die Nicht-Ziele der Spec abgleichen (installierte Pakete/Bundles vs.
+  tatsächlicher Bedarf) und ungenutzte Subsysteme aktiv entfernen, statt sie
+  stillschweigend mitzuschleppen – nicht erst bei der Abschluss-Review.
 
 ## Angriffsfläche als Architektur-Entscheidung
 

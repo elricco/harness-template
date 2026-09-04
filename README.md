@@ -38,9 +38,12 @@ und Datenschutz (DSGVO, Privacy by Design).
 ## Stacks
 
 Ausgearbeitet für **PHP/REDAXO** (tief), **JS/TS/Vue** und **WordPress**
-(solide), plus **Astro** (aus dem Astro-Praxistest, 2026-08).
-Das Prinzip ist stack-neutral – weitere Stacks brauchen nur eigene Sektionen
-in den Richtlinien plus passende Analyse-Tools.
+(solide), plus **Astro** (aus dem Astro-Praxistest, 2026-08) und
+**Symfony** (aus einem Symfony-Rebuild-Projekt, 2026-09 – Deptrac-Vendor-
+Layer, Symfony-taugliches `phpunit.xml.dist`, Docker-Entwicklungsumgebung mit
+Mailpit, siehe `configs/docker/`). Das Prinzip ist stack-neutral – weitere
+Stacks brauchen nur eigene Sektionen in den Richtlinien plus passende
+Analyse-Tools.
 
 ## Beispiele & Bausteine
 
