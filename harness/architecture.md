@@ -188,6 +188,10 @@ src/
   bei aktueller Astro-Version gegenprüfen, ob `defineConfig` inzwischen eine
   `({ command }) => …`-Funktionsform unterstützt, bevor `process.argv` als
   Workaround übernommen wird).
+- **`<Image>`/`<Picture>` mit pnpm:** `sharp` als **direkte** Abhängigkeit
+  installieren (`pnpm add sharp`). pnpm löst Astros transitive
+  sharp-Abhängigkeit nicht auf, `pnpm build` bricht sonst mit
+  `MissingSharp` ab (Astro-Website, 2026-10).
 
 ## WordPress – Schichtung
 

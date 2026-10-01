@@ -121,6 +121,39 @@ gitleaks protect --staged       # vor jedem Commit: nur gestagte Änderungen
 - Zusätzlich im GitHub-Repo **Push Protection / Secret Scanning** aktivieren
   (Settings → Code security).
 
+## UI-Verifikation im Browser (Agent)
+
+Statische Analysen und pa11y sagen nichts darüber, ob ein Layout seinen
+**Zweck** erfüllt. Gelernt in einer Astro-Website (2026-10), wo eine
+Footer-Änderung als „erledigt" gemeldet wurde, obwohl sie das eigentliche
+Ziel verfehlte:
+
+- **Gegen das Ziel messen, nicht gegen die Position.** „Unter den Links"
+  war erfüllt, „schließt die Lücke neben dem Newsletter" nicht. Das Ziel der
+  Anfrage in eine messbare Bedingung übersetzen (z. B. Unterkante Element ==
+  Unterkante Nachbarspalte, Breite == Breite der Spalten darüber) und per
+  `getBoundingClientRect()` prüfen.
+- **Mehrere Breiten, nicht eine.** Das Agent-Browserfenster lässt sich nicht
+  immer verkleinern und ist oft breiter als typische Screens. Stattdessen
+  same-origin-`<iframe>`s mit fester Breite (z. B. 700/950/1180/1440/1680 px)
+  in die Seite hängen und darin messen. Cross-Origin-iframes (anderer Port)
+  liefern `contentDocument === null` – von einer Seite derselben Origin aus
+  messen.
+- **Hintergrund-Tabs sind gedrosselt.** Automatisierte Tabs laufen oft mit
+  `document.visibilityState === "hidden"`: Animationen, Transitions und
+  IntersectionObserver pausieren. Folge: halb eingeblendete Inhalte,
+  „hängende" Farbübergänge, leere oder gekachelte Screenshots – **kein Bug
+  der Seite**. Vor einer Fehlersuche `visibilityState` prüfen; Zustände per
+  JS auslesen; Screenshots erst nach einem echten Scroll.
+- **Verdacht per A/B isolieren.** Beispiel CSP: dieselbe Build-Ausgabe einmal
+  mit, einmal ohne Header ausliefern (kleiner lokaler Server) und vergleichen,
+  statt aus einem Symptom auf die Ursache zu schließen.
+- **pa11y prüft nur den Standard-Farbmodus.** Zweiten Modus per Action
+  testen (`"actions": ["click element .theme-toggle"]`, `"wait": 1500`).
+  Transparente Header über Hero-Bildern meldet pa11y als Kontrastfehler,
+  weil es das Bild dahinter nicht sieht – im Browser nachsehen, bevor man
+  „repariert".
+
 ## Regeln
 
 - **Tests laufen zuerst** (grün), dann Stil/Statik/Architektur.

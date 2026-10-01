@@ -23,6 +23,19 @@
   nur entfernen.
 - **Secrets nie in:** Logs, Fehlermeldungen, URLs/Query-Strings, Client-Bundles
   (siehe `VITE_`-Regel unten), CI-Logs (maskierte GitHub-Secrets verwenden).
+- **Secrets im Deploy aus der CI erzeugen, nicht von Hand auf den Server
+  legen** (wo die CI ohnehin deployt): Config-Dateien wie `config.php` aus
+  maskierten CI-Secrets generieren. Regeln dafür:
+  - Werte **mit der Sprache selbst escapen** (`var_export` in PHP,
+    `json.dumps` o. ä.), nie per String-Bau – ein `'`, `\` oder `$` im
+    Passwort darf die Datei weder zerbrechen noch Code einschleusen.
+  - Fehlende/ungültige Werte **vor** dem Kontakt zum Server abfangen; die
+    Fehlermeldung nennt nur **Namen**, nie Werte (landet im CI-Log).
+  - Datei mit `0600` hochladen, **außerhalb** des Document Root, und auf dem
+    Runner im `always()`-Schritt löschen.
+  - Generator mit Tests absichern (Sonderzeichen, fehlende Werte) und die
+    Tests in der CI laufen lassen.
+  Referenz: `api-php/tools/build-config.php` in einem Astro-Projekt.
 - **Deterministische Prüfung:** **gitleaks** scannt Repo und Staging auf
   Secret-Muster (siehe [`verification-tools.md`](verification-tools.md));
   zusätzlich GitHub **Push Protection / Secret Scanning** im Remote aktivieren.
@@ -131,7 +144,10 @@ Lauffähige Referenz mit allen Schichten:
 - **Dependencies:** `npm audit` sauber halten; `eslint-plugin-security` beachten.
 - **API-Aufrufe:** Antworten nicht blind vertrauen; Eingaben clientseitig
   validieren, aber Autorität liegt beim Server.
-- **CSP:** Content-Security-Policy setzen; keine Inline-Skripte.
+- **CSP:** Content-Security-Policy setzen; keine Inline-Skripte. Strikte
+  `style-src 'self'` blockiert auch `style="…"`-Attribute im Markup – das
+  betrifft vor allem übernommene Design-Mockups (siehe
+  [`design.md`](design.md)).
 
 ## Astro
 
@@ -156,8 +172,51 @@ Lauffähige Referenz mit allen Schichten:
   gesetzt wird sie vom Config-Schema stillschweigend ignoriert). Bei
   produktionsrelevanten CSP-Änderungen den tatsächlichen Build-Output
   gegenprüfen (Hashes neu berechnen), nicht nur die Config lesen.
+- **CSP gehört dorthin, wo der Server sie liest.** `public/_headers` ist das
+  Netlify-/Cloudflare-Format – **Apache ignoriert es**. Auf Shared Hosting
+  muss die Policy in die Webroot-`.htaccess` (`Header set
+  Content-Security-Policy …`). Im Pilot stand die CSP nur in `_headers` und
+  wäre live nie aktiv gewesen. Bei mehreren Zielen beide Quellen pflegen.
+- **Inline-Hashes per Build-Check absichern.** Hashes für Inline-Blöcke
+  (z. B. JSON-LD) hängen vom Inhalt ab (Seitenname, Domain) und veralten
+  still, sobald sich dieser ändert – der Browser blockiert dann ohne
+  sichtbaren Fehler. Ein Skript nach dem Build (`pnpm csp:check`) hasht alle
+  Inline-Blöcke aus `dist/` und prüft sie gegen jede CSP-Quelle; in der CI
+  bricht es den Build. Referenz: `scripts/check-csp.mjs` im
+  Astro-Projekt.
 - **Fremd-Requests im Client-Bundle** genauso behandeln wie bei jedem
   JS/TS-Projekt (siehe oben, `VITE_`-Regel).
+
+## Deployment (Shared Hosting per rsync/SSH)
+
+Gelernt beim ersten echten Deploy-Setup (Astro-Website, 2026-10):
+
+- **Projektordner über dem Document Root.** `config.php`, Rate-Limit-Ordner
+  und `vendor/` liegen eine Ebene über dem Ordner, auf den die Domain zeigt
+  (z. B. `<projekt>/dist/`). Per URL unerreichbar.
+- **`--delete` nur im Document Root.** rsync synchronisiert ausschließlich
+  `<projekt>/dist/`, nie den Projektordner – sonst löscht jeder Deploy
+  Config und Laufzeitdaten, die nicht im Repo liegen.
+- **Ein Paket, ein Sync.** Alles, was in den Document Root gehört (statischer
+  Build, API-Ordner, `.htaccess`, Fehlerseiten), vorher zu **einem** Paket
+  zusammenstellen. Zwei getrennte Syncs mit `--delete` löschen sich
+  gegenseitig.
+- **Abhängigkeiten in der CI bauen** (`composer install --no-dev` nach
+  `composer.lock`) und hochladen – kein Composer auf dem Server, kein
+  Handupload. `composer validate --strict` und `composer audit --locked` in
+  der CI.
+- **Keine Fremd-Action mit dem privaten Schlüssel.** `rsync`/`ssh` sind auf
+  dem Runner vorhanden; eine Marketplace-Action bekäme sonst den Deploy-Key.
+  Eigener Deploy-Key pro Projekt.
+- **Host-Key prüfen:** `known_hosts` als Secret (`ssh-keyscan -H <host>`,
+  Fingerprint einmal manuell prüfen) – nie `StrictHostKeyChecking=no`.
+- **Per Variable aktivieren** (`vars.DEPLOY_ENABLED == 'true'`), damit Pushes
+  vor dem Setup nicht an fehlenden Secrets scheitern.
+- **Portable Optionen:** `--chmod=u=rw,go=` statt `--chmod=F600` (alte
+  rsync-Versionen, z. B. macOS 2.6.9, kennen die Kurzform nicht).
+
+Lauffähige Vorlage: `.github/workflows/ci.yml` und `api-php/README.md`
+(„Deployment") in einem Astro-Projekt.
 
 ## Prüfung
 
