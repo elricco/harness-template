@@ -166,6 +166,14 @@ hängen. Weitere Lighthouse-Fallen aus demselben Projekt:
   ["is-crawlable"]` **und** die Assertion `"is-crawlable": "off"` – das
   Preset verlangt sonst, dass jede Prüfung gelaufen ist (`auditRan`).
   Beides beim Livegang entfernen.
+- `offscreen-images` kann **nur in der CI** anschlagen: Lighthouse wertet
+  ein Bild außerhalb des ersten Bildschirms erst als Fehler, wenn es vor
+  dem Zeitpunkt der Interaktivität geladen ist – auf der langsameren
+  CI-CPU trifft das zu, lokal oft nicht. Ursache war ein mobil
+  unterhalb des Folds stehendes `eager`-Bild (siehe
+  `harness/architecture.md`, Astro). Lokal mit
+  `--settings.throttling.cpuSlowdownMultiplier` nachstellen reicht nicht
+  immer – im Zweifel die Bildposition im Mobilformat (412 × 823) messen.
 - `errors-in-console` schlägt an, wenn die Seite beim Laden ein Backend
   anfragt, das im statischen Test fehlt (z. B. `/api/form-token`). Dann als
   Warnung führen, nicht abschalten – echte JS-Fehler bleiben so sichtbar.

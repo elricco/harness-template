@@ -192,6 +192,15 @@ src/
   installieren (`pnpm add sharp`). pnpm löst Astros transitive
   sharp-Abhängigkeit nicht auf, `pnpm build` bricht sonst mit
   `MissingSharp` ab (Astro-Website, 2026-10).
+- **`loading="eager"`/`fetchpriority="high"` nur, wenn das Bild bei
+  _jeder_ Breite im ersten Bildschirm steht.** Ein Hero-Porträt, das am
+  Desktop oben steht, rutscht mobil oft unter den Text – eager geladen
+  belegt es dann Bandbreite, die der sichtbare Inhalt braucht. Ein `<img>`
+  kann nicht je Breite unterschiedlich laden; im Zweifel `loading="lazy"`
+  (Astros Standard) – im Viewport lädt der Browser es trotzdem direkt.
+  Mobil nachmessen (Lighthouse `offscreen-images`); in einer Astro-Website
+  (2026-10) war `lazy` auf beiden Formaten schneller (Desktop-LCP 0,60 →
+  0,54 s).
 
 ## WordPress – Schichtung
 
