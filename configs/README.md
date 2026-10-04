@@ -169,11 +169,18 @@ hängen. Weitere Lighthouse-Fallen aus demselben Projekt:
 - `offscreen-images` kann **nur in der CI** anschlagen: Lighthouse wertet
   ein Bild außerhalb des ersten Bildschirms erst als Fehler, wenn es vor
   dem Zeitpunkt der Interaktivität geladen ist – auf der langsameren
-  CI-CPU trifft das zu, lokal oft nicht. Ursache war ein mobil
-  unterhalb des Folds stehendes `eager`-Bild (siehe
-  `harness/architecture.md`, Astro). Lokal mit
-  `--settings.throttling.cpuSlowdownMultiplier` nachstellen reicht nicht
-  immer – im Zweifel die Bildposition im Mobilformat (412 × 823) messen.
+  CI-CPU trifft das zu, lokal nicht (auch nicht mit
+  `--settings.throttling.cpuSlowdownMultiplier`). Ursache in
+  Astro-Website war ein **CSS-Hintergrundbild** (249 KB) in einem
+  CTA-Band weit unten – CSS-Hintergründe kennen kein `loading="lazy"`
+  (Lösung: `harness/architecture.md`, Astro). Korrektur zu v2.9.1: Dort
+  stand, ein `eager`-Porträt sei die Ursache gewesen – das war eine
+  ungeprüfte Annahme, der Bericht zeigte etwas anderes.
+- **Erst den Bericht lesen, dann fixen.** Der CI-Log nennt nur die
+  Prüfung, nicht das Element. Welches Bild/Element betroffen ist, steht im
+  Bericht (`upload.target: "filesystem"` + Artefakt, siehe oben). Ohne ihn
+  wird aus der Seitenstruktur geraten – in einer Astro-Website kostete das
+  einen zusätzlichen, wirkungslosen Fix-Zyklus.
 - `errors-in-console` schlägt an, wenn die Seite beim Laden ein Backend
   anfragt, das im statischen Test fehlt (z. B. `/api/form-token`). Dann als
   Warnung führen, nicht abschalten – echte JS-Fehler bleiben so sichtbar.

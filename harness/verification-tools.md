@@ -156,6 +156,11 @@ Ziel verfehlte:
   Transparente Header über Hero-Bildern meldet pa11y als Kontrastfehler,
   weil es das Bild dahinter nicht sieht – im Browser nachsehen, dann per
   `hideElements` mit Begründung ausnehmen statt die Farben zu „reparieren".
+- **Bei CI-Befunden erst die Belege holen, dann fixen.** Logs nennen oft
+  nur die fehlgeschlagene Prüfung, nicht das betroffene Element. Bericht/
+  Artefakt herunterladen und das konkrete Element nachlesen, statt es aus
+  Seitenstruktur oder Code abzuleiten – eine plausible Vermutung, die lokal
+  nicht nachstellbar ist, ist kein Beleg.
 - **Vor lokalen Prüfläufen Ports freimachen.** Ein noch laufender
   Preview-Server eines anderen Projekts wird von `start-server-and-test`
   stillschweigend mitbenutzt – geprüft wird dann die falsche Seite.

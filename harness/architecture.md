@@ -198,9 +198,20 @@ src/
   belegt es dann Bandbreite, die der sichtbare Inhalt braucht. Ein `<img>`
   kann nicht je Breite unterschiedlich laden; im Zweifel `loading="lazy"`
   (Astros Standard) – im Viewport lädt der Browser es trotzdem direkt.
-  Mobil nachmessen (Lighthouse `offscreen-images`); in einer Astro-Website
-  (2026-10) war `lazy` auf beiden Formaten schneller (Desktop-LCP 0,60 →
-  0,54 s).
+  Mobil nachmessen; in einer Astro-Website (2026-10) war `lazy` auf beiden
+  Formaten schneller (Desktop-LCP 0,60 → 0,54 s).
+- **CSS-Hintergrundbilder unterhalb des ersten Bildschirms nachladen.** Für
+  `background-image` gibt es kein `loading="lazy"` – der Browser lädt sie
+  sofort, sobald das Element im DOM steht (Lighthouse `offscreen-images`,
+  in einer Astro-Website 249 KB in einem CTA-Band ganz unten). Muster: Element
+  mit `data-lazy-bg` markieren; eine CSS-Regel blendet das Bild aus, solange
+  die Klasse `is-bg-loaded` fehlt:
+  `.js [data-lazy-bg]:not(.is-bg-loaded) { background-image: none; }`.
+  Ein IntersectionObserver (`rootMargin: "300px 0px"`) setzt die Klasse.
+  Ohne JS fehlt `.js`,
+  das Bild lädt wie gewohnt. Hero-Hintergründe im ersten Bildschirm nicht
+  markieren. Referenz: `src/scripts/lazy-background.ts` in
+  Astro-Website.
 
 ## WordPress – Schichtung
 
