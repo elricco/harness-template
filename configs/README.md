@@ -128,6 +128,48 @@ gezielt nur die wirklich nicht anwendbaren Audits abschalten, nicht das
 ganze Preset verwerfen – `errors-in-console` und `link-text` etc. sind
 echte, sinnvolle Checks.
 
+**pa11y deterministisch machen (Lektion aus einer Astro-Website, 2026-10):**
+Die `.pa11yci` hier setzt zwei Chrome-Flags, beide aus einem echten
+CI-Fehlschlag:
+
+- `--blink-settings=preferredColorScheme=1` legt den Farbmodus fest
+  (1 = hell, 0 = dunkel). Ohne das entscheidet das Betriebssystem: lokal auf
+  macOS (dunkel) war alles grün, in der CI (Linux, hell) nicht. Hat ein
+  Projekt einen Dark Mode, **beide Modi prüfen** (zweite Config mit `0`) –
+  nicht per Klick auf einen Theme-Toggle: pa11y misst dann mitten in
+  CSS-Transitions und meldet Phantom-Kontrastfehler.
+- `--force-prefers-reduced-motion`: Scroll-Animationen starten Inhalte mit
+  `opacity: 0`, und pa11y **überspringt unsichtbare Elemente** – geprüft
+  wurde praktisch nur der erste Bildschirm. Mit reduzierter Bewegung ist
+  alles sofort sichtbar (setzt voraus, dass die Animationen
+  `prefers-reduced-motion` respektieren).
+- **Belegter Port = falsche Seite:** `start-server-and-test` nutzt einen
+  bereits belegten Port stillschweigend mit. Läuft dort noch ein
+  Preview-Server eines **anderen** Projekts, prüft pa11y dessen Seiten. Vor
+  lokalen Läufen den Port freimachen (`lsof -ti tcp:4321 | xargs kill`).
+- Kein `pa11y`-Einzel-CLI voraussetzen: installiert ist nur `pa11y-ci`;
+  für eine einzelne URL eine Mini-Config übergeben.
+- pa11y-ci akzeptiert auch `.pa11yci.cjs` – dann sind Kommentare zu
+  Ausnahmen (`hideElements` für Fehlalarme) direkt in der Config möglich.
+
+**Lighthouse-Bericht nicht öffentlich hochladen (dieselbe Lektion):**
+`upload.target: "temporary-public-storage"` legt jeden Bericht öffentlich
+abrufbar bei Google ab – auch aus privaten Repos und von noch nicht
+veröffentlichten Seiten. Die Vorlage nutzt deshalb `"filesystem"`; in der
+CI den Ordner per `actions/upload-artifact` (mit `if: always()`) an den Lauf
+hängen. Weitere Lighthouse-Fallen aus demselben Projekt:
+
+- `staticDistDir` muss zum **tatsächlichen** Build-Output passen. Astro mit
+  `@astrojs/node`-Adapter legt Seiten unter `dist/client`, ohne Adapter
+  direkt in `dist/` – ein veralteter Pfad liefert Lighthouse nur 404.
+- Seiten mit `noindex` vor dem Livegang: `collect.settings.skipAudits:
+  ["is-crawlable"]` **und** die Assertion `"is-crawlable": "off"` – das
+  Preset verlangt sonst, dass jede Prüfung gelaufen ist (`auditRan`).
+  Beides beim Livegang entfernen.
+- `errors-in-console` schlägt an, wenn die Seite beim Laden ein Backend
+  anfragt, das im statischen Test fehlt (z. B. `/api/form-token`). Dann als
+  Warnung führen, nicht abschalten – echte JS-Fehler bleiben so sichtbar.
+
 **`staticDistDir` vs. Live-Server (Lektion aus einem Symfony-Rebuild-Projekt,
 2026-09):** `lighthouserc.json` hier ist per `staticDistDir: "./dist"` auf
 statische Build-Ausgaben zugeschnitten (Astro, Eleventy, Hugo …). Bei jedem

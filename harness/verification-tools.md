@@ -148,11 +148,17 @@ Ziel verfehlte:
 - **Verdacht per A/B isolieren.** Beispiel CSP: dieselbe Build-Ausgabe einmal
   mit, einmal ohne Header ausliefern (kleiner lokaler Server) und vergleichen,
   statt aus einem Symptom auf die Ursache zu schließen.
-- **pa11y prüft nur den Standard-Farbmodus.** Zweiten Modus per Action
-  testen (`"actions": ["click element .theme-toggle"]`, `"wait": 1500`).
+- **pa11y prüft nur, was es sieht – und nur einen Farbmodus.** Ohne
+  festen Modus entscheidet das OS (lokal dunkel, CI hell). Per Animation
+  ausgeblendete Inhalte (`opacity: 0`) werden übersprungen. Beides per
+  Chrome-Flag festlegen statt per Theme-Toggle-Klick (der misst mitten in
+  Transitions) – Details und Flags: [`../configs/README.md`](../configs/README.md).
   Transparente Header über Hero-Bildern meldet pa11y als Kontrastfehler,
-  weil es das Bild dahinter nicht sieht – im Browser nachsehen, bevor man
-  „repariert".
+  weil es das Bild dahinter nicht sieht – im Browser nachsehen, dann per
+  `hideElements` mit Begründung ausnehmen statt die Farben zu „reparieren".
+- **Vor lokalen Prüfläufen Ports freimachen.** Ein noch laufender
+  Preview-Server eines anderen Projekts wird von `start-server-and-test`
+  stillschweigend mitbenutzt – geprüft wird dann die falsche Seite.
 
 ## Regeln
 
