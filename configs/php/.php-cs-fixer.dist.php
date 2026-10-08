@@ -17,5 +17,8 @@ return (new PhpCsFixer\Config())
         'native_function_invocation' => ['include' => ['@compiler_optimized']],
         'ordered_imports' => ['sort_algorithm' => 'alpha'],
         'no_unused_imports' => true,
+        // Lektion (REDAXO-Projekt, 2026-10): @Symfony erzwingt camelCase-Testnamen.
+        // Die Beispiele in harness/testing.md nutzen test_snake_case, daher aus.
+        'php_unit_method_casing' => false,
     ])
     ->setFinder($finder);

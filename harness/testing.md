@@ -45,6 +45,40 @@ mit echten HTTP-Requests gegen eine laufende Instanz aufdeckte.
   [`../configs/docker/`](../configs/docker/)) macht diesen Smoke-Test
   günstig genug, um ihn regelmäßig zu wiederholen, nicht nur einmal am Ende.
 
+## PHPUnit-Stolpersteine (PHPUnit 12/13)
+
+Gelernt in einem REDAXO-Projekt (2026-10), jeweils beim ersten Lauf:
+
+- **Doc-Comment-Annotationen sind weg.** `@dataProvider` & Co. werden ab
+  PHPUnit 12 ignoriert, der Test bekommt dann zu wenige Argumente. Attribute
+  verwenden: `#[DataProvider('name')]` mit
+  `use PHPUnit\Framework\Attributes\DataProvider;`. Provider sind `static`.
+- **Hilfsmethoden nicht `fail()` nennen.** `Assert::fail()` ist `final`, ein
+  eigener Helfer gleichen Namens ist ein Fatal Error beim Laden der Klasse
+  (der Test ist dann "rot" aus dem falschen Grund). Besser sprechende Namen
+  (`recordFailures()`).
+- **RED immer auf den Grund lesen.** "Class not found" ist der gewollte
+  Fehlschlag, ein Fatal Error im Test selbst nicht.
+- **Installierte Major-Versionen pruefen** (PHPUnit 13, PHPStan 2, Deptrac 4,
+  CS-Fixer 3.95 im Oktober 2026), bevor Configs aus dem Template kopiert werden.
+
+## Zeit- und Ratenlogik adversarial testen
+
+Gelernt in einem REDAXO-Projekt (2026-10): Ein Video-Nachweis (Heartbeats gegen
+Echtzeit) hatte 23 gruene Tests und trotzdem eine Umgehung, die ein 600-s-Video
+bei **0 s Echtzeit** als gesehen wertete. Ursache: Eine Toleranz (Jitter), die
+nur ueber die *Annahme* eines Ereignisses entscheiden sollte, wurde bei jedem
+Schritt erneut *gutgeschrieben*. Die ehrlichen Tests deckten das nicht ab.
+
+- Fuer jede Logik, die Zeit, Raten oder Guthaben bewertet, gehoeren
+  **Angreifer-Tests** neben die ehrlichen: Nullzeit-Schleife (700 Aufrufe mit
+  identischem Zeitstempel), Pause und danach Burst, Zustand abwechselnd
+  verlassen und wieder betreten, Wiederherstellung aus dem gespeicherten Zustand.
+- Toleranzen duerfen **annehmen oder ablehnen, nie gutschreiben.** Gutgeschrieben
+  wird nur, was nachweislich vergangen ist (`min(Behauptung, Echtzeit)`).
+- Ein frischer Reviewer mit dem Auftrag "versuche zu betrügen" hat das gefunden,
+  die eigene Testsuite nicht. Fuer sicherheitsrelevante Domainlogik einplanen.
+
 ## Testbarkeit durch Schnitt
 
 Damit TDD in REDAXO überhaupt schnell geht: Geschäftslogik gehört in die

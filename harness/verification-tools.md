@@ -120,6 +120,19 @@ gitleaks protect --staged       # vor jedem Commit: nur gestagte Änderungen
   [`security.md`](security.md)).
 - Zusätzlich im GitHub-Repo **Push Protection / Secret Scanning** aktivieren
   (Settings → Code security).
+- **Ohne lokale Installation** (Docker, gepinnte Version statt `latest`):
+  `docker run --rm -v "$PWD:/repo" ghcr.io/gitleaks/gitleaks:<version> detect --source /repo --redact --no-banner`.
+- **Fehlalarme in Test-Fixtures** (z. B. `SECRET = '0123456789abcdef…'`) nicht
+  ignorieren, sondern in `.gitleaks.toml` eng ausnehmen. Achtung: In einem
+  `[allowlist]` werden `paths` und `regexes` mit **ODER** verknuepft, ein
+  `paths`-Eintrag nimmt die ganze Datei aus dem Scan. Besser nur `regexes`
+  (oder `[[allowlists]]` mit `condition = "AND"`).
+- **Erkennung beweisen:** Nach jeder Allowlist-Aenderung einen Wegwerf-Ordner mit
+  realistischen Mustern scannen (Stripe `sk_live_…`, GitHub `ghp_…`, RSA-Block).
+  Offensichtlich erfundene Werte (`…EXAMPLE…`) erkennt gitleaks absichtlich
+  nicht, ein Negativtest damit sagt nichts.
+- Hilfsskripte mit `git add -A` committen auch Caches (`.deptrac.cache`):
+  vorher `.gitignore` pruefen.
 
 ## UI-Verifikation im Browser (Agent)
 

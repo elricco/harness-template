@@ -13,6 +13,13 @@
 # das eigene Projekt anpassen (bei reinem REDAXO-Code ggf. leer lassen /
 # entfernen, REDAXO selbst ist ueberwiegend prozedural mit globalen rex_*-
 # Funktionen, kein rein klassenbasierter Import).
+# Lektion (REDAXO-Projekt, 2026-10): Ab Deptrac 4 heisst der Collector
+# `classNameRegex` (Regex MIT Delimitern, z. B. '#^rex_#'); `className` wirft
+# "Could not find a collector for type className". Deptrac <= 3 kennt nur
+# `className`. Pruefe die installierte Version, bevor du die Datei kopierst.
+# Negativtest nach dem Einrichten (Pflicht, sonst ist die Regel ungeprueft):
+# eine Probe-Klasse mit `new \rex_sql()` in lib/Domain/ anlegen, `deptrac
+# analyse` muss "must not depend on rex_sql" melden, Probe danach loeschen.
 deptrac:
     paths:
         - ./lib
@@ -25,14 +32,21 @@ deptrac:
           collectors:
               - type: directory
                 value: lib/Redaxo/.*
+        # REDAXO-Core-Klassen (rex_sql, rex_config, ...). Ohne diese Schicht
+        # bleiben sie "Uncovered" und Domain: ~ wuerde sie nie melden.
+        - name: RexCore
+          collectors:
+              - type: classNameRegex
+                value: '#^rex_#'
         - name: Vendor
           collectors:
-              - type: className
-                value: ^(Symfony|Doctrine|Psr)\\
+              - type: classNameRegex
+                value: '#^(Symfony|Doctrine|Psr)\\#'
     ruleset:
-        # Redaxo-Schicht darf auf Domain und auf Vendor-Code zugreifen ...
+        # Redaxo-Schicht darf auf Domain, REDAXO-Core und Vendor-Code zugreifen ...
         Redaxo:
             - Domain
+            - RexCore
             - Vendor
         # ... Domain auf nichts (reine, testbare Logik) - das schliesst
         # jetzt auch Vendor/Framework-Importe mit ein.
