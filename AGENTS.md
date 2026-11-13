@@ -6,7 +6,7 @@
 > nachgeladen.
 >
 > <!-- TEMPLATE: Kopiere diesen Ordner (AGENTS.md + harness/) in den Root deines Repos und passe die TODOs an. -->
-> <!-- Vorlagen-Version: 2.10.0 (2026-10-08) - https://github.com/elricco/harness-template -->
+> <!-- Vorlagen-Version: 2.11.0 (2026-11-13) - https://github.com/elricco/harness-template -->
 
 ## Mindset
 
@@ -64,6 +64,11 @@ Richtlinien, bevor du im jeweiligen Bereich arbeitest.
 
 Folge dem Ablauf in [`harness/workflow.md`](harness/workflow.md):
 Spec → Test (Red) → Code (Green) → Refactor → Verifikation → Spec-Sync. Details dort.
+
+**Branches:** Gearbeitet und committet wird auf `develop` (größere Vorhaben auf
+`feature/*` von `develop`). Nach `staging` nur auf ausdrückliche Ansage, nach
+`main` nie. Details und Release-Ablauf: Abschnitt „Git“ in
+[`harness/workflow.md`](harness/workflow.md).
 
 ## Lazy Loading – lies VOR der Arbeit im jeweiligen Bereich
 
