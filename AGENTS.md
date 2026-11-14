@@ -6,7 +6,7 @@
 > nachgeladen.
 >
 > <!-- TEMPLATE: Kopiere diesen Ordner (AGENTS.md + harness/) in den Root deines Repos und passe die TODOs an. -->
-> <!-- Vorlagen-Version: 2.11.0 (2026-11-13) - https://github.com/elricco/harness-template -->
+> <!-- Vorlagen-Version: 2.12.0 (2026-11-14) - https://github.com/elricco/harness-template -->
 
 ## Mindset
 
@@ -80,7 +80,7 @@ Spec → Test (Red) → Code (Green) → Refactor → Verifikation → Spec-Sync
 - **Bei UI-Gestaltung (Farben, Typo, Layout, Look)** → lies `DESIGN.md` im Repo-Root + [`harness/design.md`](harness/design.md)
 - **Bei personenbezogenen Daten, Formularen, Tracking, externen Diensten** → lies [`harness/privacy.md`](harness/privacy.md)
 - **Bevor Fremdtext an ein LLM/einen Agenten geht (oder ein Tool-/MCP-Server entsteht)** → lies [`harness/untrusted-input.md`](harness/untrusted-input.md)
-- **Beim Umgang mit Anforderungen/Specs** → lies [`harness/spec-driven.md`](harness/spec-driven.md)
+- **Beim Umgang mit Anforderungen/Specs und beim Zuschneiden von Arbeitspaketen** → lies [`harness/spec-driven.md`](harness/spec-driven.md)
 
 ## Verifikation nach jeder Code-Änderung (verbindlich)
 

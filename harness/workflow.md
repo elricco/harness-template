@@ -23,6 +23,9 @@
 - **YAGNI:** Nur bauen, was die aktuelle Spec verlangt. Der beste Code ist der,
   der nicht geschrieben werden musste.
 - **KISS:** Die einfachste Lösung, die die Tests grün macht, gewinnt.
+- **Tracer Bullet zuerst:** Das erste Arbeitspaket eines Vorhabens ist ein
+  dünner Pfad durch alle Schichten bis auf Staging, danach folgen vertikale
+  Scheiben. Details: [`spec-driven.md`](spec-driven.md).
 - Lieber kleine, fokussierte Sessions als stundenlange Mammut-Sessions.
 - Kein "fertig" ohne bestandene Verifikation **und** grüne Tests.
 
