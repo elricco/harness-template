@@ -21,20 +21,29 @@ Nach _The Pragmatic Programmer_ (Hunt/Thomas): Leuchtspurmunition zeigt sofort,
 wo sie einschlägt – man korrigiert am echten Treffer statt an der Berechnung.
 
 **Arbeitspaket 1 ist immer der Tracer Bullet:** ein dünner, echter Pfad durch
-**alle** Schichten des Vorhabens – Eingabe/UI → Logik → Speicherung → Ausgabe
-→ Build/Deploy bis auf `staging`. Fachlich kann er fast nichts (ein Feld, eine
-Route, ein Datensatz), technisch ist er vollständig.
+**alle** Komponenten der Architektur – Eingabe/UI → Logik → Speicherung →
+Ausgabe. Fachlich kann er fast nichts (ein Feld, eine Route, ein Datensatz),
+technisch ist er vollständig. Sein Zweck ist der Machbarkeitsbeweis: Trägt das
+Gesamtkonzept?
 
 - **Produktionsqualität, kein Wegwerfcode.** TDD, Verifikation, Spec – wie
   jedes andere Paket. Er wird danach ausgebaut, nicht ersetzt. (Wer eine
   offene Frage nur klären will und den Code wegwirft, baut einen _Prototyp_ –
   das ist erlaubt, muss aber so benannt und nie gemergt werden.)
-- **Fertig heißt: läuft auf Staging.** Erst wenn der Pfad im echten Zielsystem
-  funktioniert (Container, Server, CSP, Rechte, Secrets), ist der Tracer Bullet
-  abgeschlossen. Genau dort liegen die Überraschungen, die sonst erst in der
-  letzten Woche auftauchen.
+- **Fertig heißt: läuft mit dem Produktions-Build.** Nicht nur im
+  Dev-Server, sondern unter Produktionsbedingungen – lokal reicht: Prod-Image
+  bauen + Smoke-Test, bzw. `build` + `preview` statt Dev-Modus. Manche
+  Architekturfragen zeigen sich nur dort (Laufzeit-Env-Variablen, CSP,
+  Prod-Image mit anderer PHP-Version/anderen Rechten); ohne diesen Schritt
+  beweist der Tracer Bullet nur „läuft bei mir“.
+- **Kein Deployment nötig.** Staging ist Abnahme, nicht Machbarkeit – die
+  erste Scheibe auf Staging ist ein eigener, früher Meilenstein danach.
+  **Ausnahme:** Ist die Zielumgebung selbst das Risiko (neues Hosting,
+  Serverless/Edge-Runtime, spezielle Server-Infrastruktur), gehört das
+  Deployment in den Tracer Bullet. Das wird im Gesamtdesign entschieden, nicht
+  pauschal.
 - **Alle weiteren Pakete sind vertikale Scheiben:** jede liefert ein
-  Stück Funktion, das Ende-zu-Ende nutzbar und auf Staging zeigbar ist.
+  Stück Funktion, das Ende-zu-Ende nutzbar und vorzeigbar ist.
   Nicht nach Schichten schneiden („erst das ganze Backend, dann das UI“).
 - **Daneben getroffen = Plan anpassen.** Zeigt der Tracer Bullet, dass eine
   Architekturentscheidung nicht trägt, wird das Gesamtdesign korrigiert,
@@ -42,8 +51,8 @@ Route, ein Datensatz), technisch ist er vollständig.
 
 Beispiel (mehrstufiges Formular mit Verwaltungsbereich): Nicht „AP 1: alle
 Abschnitte der Strecke, AP 2: Portal, AP 3: Deployment“, sondern „AP 1: ein
-Eingabefeld wird gespeichert, erscheint im Portal und läuft als Image auf
-Staging“, danach je Abschnitt eine Scheibe.
+Eingabefeld wird gespeichert und erscheint im Portal – nachgewiesen im lokal
+gebauten Prod-Image“, danach je Abschnitt eine Scheibe.
 
 ## Spec-Format
 
