@@ -68,7 +68,7 @@ npx @google/design.md export --tailwind # Tailwind-Config / DTCG-tokens.json
 ## Vom gelieferten Design zur Umsetzung (Prozess)
 
 Gelernt bei der ersten Umsetzung eines Claude-Design-Exports in ein
-Astro-Projekt (Astro-Website, 2026-10). Gilt sinngemäß für jedes
+Astro-Projekt (2026-10). Gilt sinngemäß für jedes
 Design-Tool, das HTML-Mockups plus Token-Tabelle liefert.
 
 ### 1. Export sichten, bevor gebaut wird

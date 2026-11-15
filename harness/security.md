@@ -35,7 +35,6 @@
     Runner im `always()`-Schritt löschen.
   - Generator mit Tests absichern (Sonderzeichen, fehlende Werte) und die
     Tests in der CI laufen lassen.
-  Referenz: `api-php/tools/build-config.php` in einem Astro-Projekt.
 - **Tool-Caches vor dem ersten `git add -A` in die `.gitignore`.** Sie können
   Secrets enthalten, ohne dass man es ihnen ansieht. Vorfall in einem
   REDAXO-Projekt (2026-10): Der PHPStan-`tmpDir` enthielt einen Container-Dump mit einem
@@ -207,8 +206,7 @@ Lauffähige Referenz mit allen Schichten:
   still, sobald sich dieser ändert – der Browser blockiert dann ohne
   sichtbaren Fehler. Ein Skript nach dem Build (`pnpm csp:check`) hasht alle
   Inline-Blöcke aus `dist/` und prüft sie gegen jede CSP-Quelle; in der CI
-  bricht es den Build. Referenz: `scripts/check-csp.mjs` im
-  Astro-Projekt.
+  bricht es den Build.
 - **Fremd-Requests im Client-Bundle** genauso behandeln wie bei jedem
   JS/TS-Projekt (siehe oben, `VITE_`-Regel).
 
@@ -264,9 +262,6 @@ Gelernt beim ersten echten Deploy-Setup (Astro-Website, 2026-10):
   vor dem Setup nicht an fehlenden Secrets scheitern.
 - **Portable Optionen:** `--chmod=u=rw,go=` statt `--chmod=F600` (alte
   rsync-Versionen, z. B. macOS 2.6.9, kennen die Kurzform nicht).
-
-Lauffähige Vorlage: `.github/workflows/ci.yml` und `api-php/README.md`
-(„Deployment") in einem Astro-Projekt.
 
 ## Prüfung
 

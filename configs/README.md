@@ -54,8 +54,7 @@ zieht; im Zweifel mit `pnpm why vite` prüfen und den Typkonflikt gezielt mit
 dependency-cruiser-Schichtnamen auf `content ← layouts ← components/pages`
 umschreiben (siehe [`../harness/architecture.md`](../harness/architecture.md)),
 `.astro`-Dateien vom Cruise ausschließen (`exclude` in der Config – keine
-verlässliche Auflösung, Stand Astro 5). Praxisbeispiel: das Projekt
-einem Astro-Projekt.
+verlässliche Auflösung, Stand Astro 5).
 
 ## WordPress (`wordpress/`)
 
@@ -89,7 +88,7 @@ axe-core in Tests (`vitest-axe`, `@axe-core/playwright`) und
 `eslint-plugin-vuejs-accessibility` laufen über die normalen Test-/Lint-Setups
 (siehe [`../harness/accessibility.md`](../harness/accessibility.md)).
 
-**Chrome in CI (Lektion aus Astro-Projekt, 2026-08):** pa11y-ci und
+**Chrome in CI (Lektion aus einem Astro-Projekt, 2026-08):** pa11y-ci und
 Lighthouse CI brauchen beide ein echtes Chrome. Zwei Fallstricke, die genau
 dann auftreten, wenn es lokal funktioniert und in der CI nicht (oder erst
 nach Tagen unbemerkt bleiben):
@@ -171,7 +170,7 @@ hängen. Weitere Lighthouse-Fallen aus demselben Projekt:
   dem Zeitpunkt der Interaktivität geladen ist – auf der langsameren
   CI-CPU trifft das zu, lokal nicht (auch nicht mit
   `--settings.throttling.cpuSlowdownMultiplier`). Ursache in
-  Astro-Website war ein **CSS-Hintergrundbild** (249 KB) in einem
+  einer Astro-Website war ein **CSS-Hintergrundbild** (249 KB) in einem
   CTA-Band weit unten – CSS-Hintergründe kennen kein `loading="lazy"`
   (Lösung: `harness/architecture.md`, Astro). Korrektur zu v2.9.1: Dort
   stand, ein `eager`-Porträt sei die Ursache gewesen – das war eine

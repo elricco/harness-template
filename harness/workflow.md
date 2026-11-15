@@ -108,7 +108,7 @@ Runner-Node-Versionen mit Vorlauf, aber verbindlich (Beispiel:
 Vor dem ersten produktiven CI-Setup (und danach in größeren Abständen) gegen
 die tatsächlichen Marketplace-/Release-Seiten prüfen, nicht aus dem
 Gedächtnis oder von einem älteren Projekt kopieren – Stand beim Schreiben
-dieser Zeile (2026-08, siehe Astro-Praxistest):
+dieser Zeile (2026-08, aus einem Astro-Praxistest):
 `actions/checkout@v7`, `actions/setup-node@v7`, `actions/upload-artifact@v7`,
 `pnpm/action-setup@v6` (eigene, niedrigere Versionszählung, anderer
 Maintainer), Node **24** als aktuelle Active-LTS (22 nur noch Maintenance).

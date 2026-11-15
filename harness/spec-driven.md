@@ -50,9 +50,9 @@ Gesamtkonzept?
   bevor weitere Pakete entstehen.
 
 Beispiel (mehrstufiges Formular mit Verwaltungsbereich): Nicht „AP 1: alle
-Abschnitte der Strecke, AP 2: Portal, AP 3: Deployment“, sondern „AP 1: ein
-Eingabefeld wird gespeichert und erscheint im Portal – nachgewiesen im lokal
-gebauten Prod-Image“, danach je Abschnitt eine Scheibe.
+Schritte des Formulars, AP 2: Verwaltungsbereich, AP 3: Deployment“, sondern
+„AP 1: ein Eingabefeld wird gespeichert und erscheint im Verwaltungsbereich –
+nachgewiesen im lokal gebauten Prod-Image“, danach je Schritt eine Scheibe.
 
 ## Verträge für den nächsten Plan
 

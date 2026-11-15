@@ -246,8 +246,7 @@ src/
   Ein IntersectionObserver (`rootMargin: "300px 0px"`) setzt die Klasse.
   Ohne JS fehlt `.js`,
   das Bild lädt wie gewohnt. Hero-Hintergründe im ersten Bildschirm nicht
-  markieren. Referenz: `src/scripts/lazy-background.ts` in
-  Astro-Website.
+  markieren.
 
 ## WordPress – Schichtung
 
