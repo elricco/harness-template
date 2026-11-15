@@ -124,6 +124,42 @@ REDAXO baut auf Symfony-Komponenten. Wo Symfony den Ton angibt, folgen:
 | URLs                | `rex_url`, `rex_yrewrite` (Frontend)          |
 | Logging             | `rex_logger::logException()`                   |
 
+## REDAXO-Stolpersteine (aus der Praxis)
+
+Gelernt in einem REDAXO-5.21-Projekt (2026-10/11). Jeder Punkt war ein realer
+Fehlschlag:
+
+- **Feste IDs für Templates und Module.** Das `developer`-Addon gleicht
+  Dateien und Datenbank über die ID ab. Mit Auto-Increment entsteht nach dem
+  Neuaufsetzen ein zweites Template mit demselben Schlüssel, jeder Request
+  endet mit 500 (Duplicate Key). Feste IDs passend zu den Verzeichnisnamen
+  (`src/templates/Name [5]`) vergeben und laut abbrechen, wenn die ID belegt
+  ist.
+- **Veralteter Core-Cache:** `var/cache/core/*.cache` überlebt das Löschen von
+  `config.yml` und Datenbank; REDAXO hält sich dann für installiert (Fehler:
+  Tabelle `rex_config` fehlt). Install-/Reset-Skripte leeren den Cache vor
+  dem Setup.
+- **yrewrite schreibt die Pfaddatei nur im Backend** (Konsole, Update).
+  Legt Frontend-Code (z. B. ein Kundenbereich) Artikel an, selbst
+  `rex_yrewrite::generatePathFile([])` aufrufen – sonst ist die neue Seite bis
+  zum nächsten Cache-Löschen ein 404. Ab zwei Sprachen bekommen alle URLs ein
+  Sprachpräfix (`/de/…`); alte Adressen liefern dann 404.
+- **Artikel per API:** `rex_article_service::addArticle` legt offline an
+  (Status wird ignoriert, in Offline-Kategorien sowieso); danach
+  `articleStatus($id, 1, …)`. Eine Seite ohne Start-/404-Artikel liefert 500.
+- **`rex_api_function` beendet sich selbst** (`exit` nach der Antwort),
+  sonst rendert REDAXO danach noch die Seite. Jeder API-Aufruf
+  (`?rex-api-call=…`) startet eine Session – Tests, die ein `Set-Cookie`
+  erwarten, brauchen danach eine frische Sitzung.
+- **`sendRedirect()`** erlaubt laut Docblock nur 301/307 (PHPStan meldet
+  303); für 303 erst `setStatus('303 See Other')`.
+- **Viterex-Stylesheet** (`dist/assets/style-*.css`) wird **nach** dem
+  eigenen Addon-CSS geladen und setzt globale Regeln: `body`-Farben im
+  Dark-Mode, Prose-Formatierung für nackte `<article>`, `line-height: 1.5`
+  auf `html`, `appearance: none` auf Radios/Checkboxen. Eigene Basisfarben an
+  eine Body-Klasse hängen, kein `<article>` im eigenen Layout, `line-height`
+  und `appearance` bewusst zurücksetzen.
+
 ## JS / TS / Vue – Schichtung
 
 Dasselbe Prinzip wie bei REDAXO: **Logik von Framework trennen.**

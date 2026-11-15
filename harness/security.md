@@ -130,6 +130,21 @@ Lauffähige Referenz mit allen Schichten:
   Backend-User.
 - **Config statt Hardcoding:** Keys/Tokens über `rex_config`.
 - **Logging:** Fehler via `rex_logger::logException()`, keine Secrets ins Log.
+- **`SQL_MODE=""`:** REDAXO setzt jede DB-Verbindung darauf. Zu lange Werte
+  werden **still gekürzt** statt abgelehnt (`INSERT` und `INSERT IGNORE`
+  verhalten sich gleich). Längen deshalb in der Domäne prüfen, nicht auf die
+  Datenbank verlassen.
+- **Betriebswerte nicht per Konsolen-Argument setzen.** `bin/console` setzt
+  die Property `debug` immer auf an, und jedes `rex::setConfig` in der Konsole
+  schreibt sie zurück in `config.yml`. `config:set` mit Passwörtern legt
+  diese außerdem in die Prozessliste. Besser: ein eigener Befehl, der die
+  Werte aus der Umgebung liest und `var/data/core/config.yml` atomar und nur
+  bei Änderung schreibt (`use_https`, `use_hsts`, `live_mode`,
+  `debug.enabled=false`, Cookies `secure`, Backend-Sperre, Passwortregeln).
+  Maßgeblich ist die Datei: `config:get` zeigt nach `--unset` weiter den
+  alten Wert. Gelernt in einem REDAXO-Projekt (2026-10).
+- **PdfOut:** `setRemoteFiles(false)` ist Pflicht – standardmäßig lädt PdfOut
+  Fremdressourcen nach (SSRF/Datenabfluss).
 
 ## WordPress
 
