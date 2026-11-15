@@ -45,6 +45,36 @@ mit echten HTTP-Requests gegen eine laufende Instanz aufdeckte.
   [`../configs/docker/`](../configs/docker/)) macht diesen Smoke-Test
   günstig genug, um ihn regelmäßig zu wiederholen, nicht nur einmal am Ende.
 
+## Smoke-Tests gegen das Produktions-Image
+
+Gelernt in einem REDAXO-Projekt (2026-10), wo Smoke-Skripte je Bereich
+(Frontend-Ablauf, Verwaltungsbereich, Exporte, Betrieb) die eigentliche Abnahme getragen haben:
+
+- **Ein Betriebs-Smoke läuft gegen das gebaute Prod-Image**, nicht gegen die
+  Dev-Umgebung: Vertrauensgrenze, gesperrte Pfade, Header, Logs, Update-Pfad.
+  Veröffentlicht wird **genau das getestete Image** (kein zweiter Build,
+  siehe Release-Ablauf in [`workflow.md`](workflow.md)).
+- **Nach Änderungen an Installation, Migration, Templates oder Seeds:** von
+  leerem Volume neu aufsetzen und den Smoke **dreimal hintereinander**
+  ausführen. Ein Lauf reicht nicht – Drift (doppelte Datensätze, veralteter
+  Cache) zeigte sich erst beim zweiten.
+- **Gemeinsame Smoke-Bibliothek** (`scripts/lib/`) für Login, Seed,
+  Formularfelder; die Smokes setzen ihren Ausgangszustand selbst
+  (Seed mit `--reset`), damit sie in beliebiger Reihenfolge laufen.
+- **Sperren und Drosselungen gelten auch für Tests:** Ein Login mit
+  5-Versuche-Sperre verträgt nur einen Fehlversuch pro Lauf.
+
+### Bash-Fallen in Prüfskripten
+
+- **`cmd | grep -q` unter `set -o pipefail`** ist unzuverlässig: `grep -q`
+  beendet sich beim ersten Treffer, `cmd` bekommt SIGPIPE und die Pipeline
+  wird rot – oder bei invertierter Prüfung (`! cmd | grep -q`) fälschlich
+  grün. Ausgabe erst in eine Variable, dann prüfen:
+  `out=$(cmd); grep -q 'muster' <<<"$out"`.
+- **curl und `Secure`-Cookies:** curl ≥ 7.79 schickt `Secure`-Cookies auch
+  über `http://localhost`/`127.0.0.1`, aber nicht über andere Hostnamen –
+  dort das Cookie von Hand weiterreichen.
+
 ## PHPUnit-Stolpersteine (PHPUnit 12/13)
 
 Gelernt in einem REDAXO-Projekt (2026-10), jeweils beim ersten Lauf:

@@ -158,6 +158,13 @@ Ziel verfehlte:
   „hängende" Farbübergänge, leere oder gekachelte Screenshots – **kein Bug
   der Seite**. Vor einer Fehlersuche `visibilityState` prüfen; Zustände per
   JS auslesen; Screenshots erst nach einem echten Scroll.
+- **Was die Automatisierung nicht kann, wird Handtest – nicht „geprüft".**
+  Im Agent-Tab spielen keine Medien ab, und `innerWidth` kann 0 sein
+  (REDAXO-Projekt, 2026-10). Videowiedergabe, Zeichnen mit Maus/Touch,
+  Hoch-/Querformat und echte Handy-Breite stehen deshalb als
+  **Handtest-Checkliste** im Plan; der Bericht nennt sie ausdrücklich als
+  offen. Logik dahinter (z. B. Heartbeats) lässt sich per `fetch` gegen den
+  Endpunkt durchspielen.
 - **Verdacht per A/B isolieren.** Beispiel CSP: dieselbe Build-Ausgabe einmal
   mit, einmal ohne Header ausliefern (kleiner lokaler Server) und vergleichen,
   statt aus einem Symptom auf die Ursache zu schließen.

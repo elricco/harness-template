@@ -36,6 +36,13 @@
   - Generator mit Tests absichern (Sonderzeichen, fehlende Werte) und die
     Tests in der CI laufen lassen.
   Referenz: `api-php/tools/build-config.php` in einem Astro-Projekt.
+- **Tool-Caches vor dem ersten `git add -A` in die `.gitignore`.** Sie können
+  Secrets enthalten, ohne dass man es ihnen ansieht. Vorfall in einem
+  REDAXO-Projekt (2026-10): Der PHPStan-`tmpDir` enthielt einen Container-Dump mit einem
+  Abzug der Prozess-Umgebung – also DB- und Admin-Passwörter aus der `.env` –
+  und wurde mitcommittet. gitleaks hat es gefunden, die Werte mussten rotiert
+  werden. Betroffen sind u. a. `tmpDir` von PHPStan, `.deptrac.cache`,
+  `.php-cs-fixer.cache`, `.phpunit.cache`.
 - **Deterministische Prüfung:** **gitleaks** scannt Repo und Staging auf
   Secret-Muster (siehe [`verification-tools.md`](verification-tools.md));
   zusätzlich GitHub **Push Protection / Secret Scanning** im Remote aktivieren.
@@ -59,6 +66,9 @@ kann:
 | Offener Mail-Relay    | Absender-Adresse aus Nutzereingabe wird **nie** `From`, sondern nur `Reply-To`; `From` ist immer das eigene Postfach (SPF/DKIM). Endpunkt akzeptiert nur POSTs der eigenen Origin. |
 | Prompt Injection      | Fremdtext nie in den System-Prompt; verarbeitendes Modell ohne handelnde Tools. Details: [`untrusted-input.md`](untrusted-input.md). |
 | Ungeschützte Admin-/CMS-UI in Produktion | Git-basierte CMS mit lokalem/keinem eigenen Auth-Modus (z. B. Keystatic `local`-Storage, Decap ohne OAuth-Backend) dürfen nie in einen Produktions-Build gelangen – strukturell ausschließen (Integration nur im Dev-Build laden), nicht per Hosting-Firewall hoffen. |
+| Race Conditions bei Zustandswechseln | Zustandswechsel als **Compare-and-Set** (`UPDATE … WHERE id = :id AND state = :erwartet`, 0 Zeilen = ungültiger Übergang). Prüfen + Zählen (z. B. Login-Fehlversuche) in **einer Transaktion**. Einmalige Aktionen (Bestätigung, Import) zusätzlich per **UNIQUE-Index** absichern. Sonst passieren zwei parallele Requests beide die Prüfung und schreiben doppelt (gelernt in einem REDAXO-Projekt). |
+| CSV-/Formel-Injektion | Exporte (CSV, Excel) entschärfen jede Zelle, die mit `=`, `+`, `-`, `@`, Tab oder CR beginnt, mit einem führenden `'`. Gilt auch für Werte, die aus einem Import unverändert durchgereicht werden. |
+| Ungeschützte Downloads | Private Dateien (Belege, hochgeladene Dokumente, Exporte) liegen **außerhalb des Webroots** (Verzeichnisse `0700`, Dateien `0600`) und gehen nur über einen Endpunkt mit Anmelde- und Rechteprüfung raus – nie über `public/`. Header `Content-Disposition: attachment`, `X-Content-Type-Options: nosniff`, `Cache-Control: no-store`; Dateinamen nur aus Kennungen bauen, nie aus Nutzertext. Obergrenzen für ZIP-Exporte und Uploads (Anzahl, Bytes) – Reader und Packer halten Dateien oft mehrfach im Speicher. Ein Smoke-Test beweist, dass die Datei per direkter URL **nicht** erreichbar ist. |
 
 Was strukturell ausgeschlossen ist, wird per Statik erzwungen (PHPStan-Regeln,
 ESLint, Review) – nicht per Erinnerung.
@@ -186,6 +196,31 @@ Lauffähige Referenz mit allen Schichten:
   Astro-Projekt.
 - **Fremd-Requests im Client-Bundle** genauso behandeln wie bei jedem
   JS/TS-Projekt (siehe oben, `VITE_`-Regel).
+
+## Hinter einem Reverse-Proxy (Container, Traefik, nginx)
+
+Gelernt beim Produktions-Image eines REDAXO-Projekts (2026-10):
+
+- **`REMOTE_ADDR` ist die Adresse des Proxys.** Eine IP-Drosselung oder ein
+  Backoff trifft dann alle Nutzer gemeinsam (oder keinen). Die echte
+  Client-IP nur aus `X-Forwarded-For` lesen, wenn die Anfrage von einem
+  **explizit eingetragenen** vertrauten Proxy kommt (nginx: `set_real_ip_from`
+  + `real_ip_header`, Liste per Umgebungsvariable).
+- **`X-Forwarded-Proto` ebenso nur von vertrauten Peers** auswerten. Ohne
+  Proxy-Liste gilt alles als HTTP (**fail-closed**); Klartext-HTTP wird
+  abgelehnt statt still bedient.
+- **Header für die Anwendung überschreiben, nicht nur ergänzen:** CMS und
+  Addons lesen `HTTP_X_FORWARDED_*`/`HTTP_CLIENT_IP` teils selbst (Logs,
+  URL-Bau). Die Vertrauensgrenze setzt sie auf die aufgelösten Werte, damit
+  kein Client sie fälschen kann.
+- **Cookies `Secure`** setzen, sobald HTTPS terminiert wird – auch wenn die
+  Anwendung selbst nur HTTP sieht.
+- **`/health` nur von Loopback** erreichbar (Container-Healthcheck), nicht von
+  außen.
+- **Tokens nicht in Logs:** nginx hängt bei `limit_req` die komplette
+  Anfragezeile ins Fehlerlog – samt Token im Query (`?token=…`).
+  `limit_req_log_level info` (bzw. unter dem Log-Level) verhindert das;
+  besser noch Tokens gar nicht in URLs tragen. Ein Smoke-Test prüft das Log.
 
 ## Deployment (Shared Hosting per rsync/SSH)
 

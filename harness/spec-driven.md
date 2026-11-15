@@ -54,6 +54,21 @@ Abschnitte der Strecke, AP 2: Portal, AP 3: Deployment“, sondern „AP 1: ein
 Eingabefeld wird gespeichert und erscheint im Portal – nachgewiesen im lokal
 gebauten Prod-Image“, danach je Abschnitt eine Scheibe.
 
+## Verträge für den nächsten Plan
+
+Bewährt in einem REDAXO-Projekt mit 15 Plänen (2026-10/11): Das Review am Ende eines Plans
+hält nicht nur Befunde fest, sondern auch **Verträge** – was der nächste Plan
+einlösen muss, weil es sich erst dort lösen lässt. Beispiele: „Zustandswechsel
+als Compare-and-Set“, „Download nur über geschützten Endpunkt mit Audit“,
+„Exporte entschärfen Formelzeichen“.
+
+- Ablage in den projektweiten Setup-/Betriebsnotizen (z. B.
+  `docs/setup-notes.md`) unter „Verträge für Plan N“.
+- Der nächste Plan startet damit: jeder Vertrag wird ein Akzeptanzkriterium
+  oder ausdrücklich verschoben.
+- So geht zwischen zwei Plänen nichts verloren, was ein Review gefunden,
+  aber nicht sofort behoben hat.
+
 ## Spec-Format
 
 ```markdown
